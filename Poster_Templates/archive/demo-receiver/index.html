@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Realsense 2 Websocket Demo Receiver</title>
+
+    <script src="js/p5.min.js"></script>
+    <script src="js/osc.min.js"></script>
+
+    <style>
+    body {
+        margin: 0;
+    }
+</style>
+</head>
+<body>
+
+    <main>
+    </main>
+
+    <script>
+        const port = 8025;
+        const osc = new OSC();
+        let depthImage;
+        let w 
+        let h
+        let data
+
+        function setup() {
+        createCanvas(displayWidth, displayHeight);
+
+        // init buffer
+        depthImage = createImage(160, 120);
+
+        // setup OSC receiver
+        osc.on('/depth', msg => {
+            updateDepthImage(msg)
+        });
+
+        try {
+            osc.open({port: port});
+        } catch (e) {
+            console.log("Could not connect: " + e);
+        }
+        rectMode(CENTER)
+    }
+
+    function draw() {
+    background(0);
+    //image(depthImage, 0, 0, window.innerWidth, window.innerHeight);
+    pixelEffect()
+    //rotationEffect()
+        // reconnect osc
+        if (osc.status() === OSC.STATUS.IS_CLOSED) {
+            console.log("reconnecting...");
+            osc.open({port: port});
+        }
+    }
+
+    function rotationEffect(){
+       fill(255)
+       noStroke();
+       let spaceX = window.innerWidth/w
+       let spaceY = window.innerHeight/h
+       for(let i = 1;i<h;i+=20) {
+         for(let j = 1;j<w;j+=20)  {
+            let index = (i*w)+j
+            let rotation = (data[index]/255)*PI
+            push()
+            translate(spaceX*j,spaceY*i)
+            rotate(rotation)
+            rect(0,0,3,spaceX*1.5);
+            pop()
+        }
+    }
+}
+
+    function pixelEffect(){
+       fill(255)
+       noStroke();
+       let spaceX = window.innerWidth/w
+       let spaceY = window.innerHeight/h
+       for(let i = 0;i<h;i+=5) {
+         for(let j = 0;j<w;j+=5)  {
+            let index = (i*w)+j
+            let radius = data[index]/10
+            rect(spaceX*j,spaceY*i,radius,radius);
+        }
+    }
+}
+
+function updateDepthImage(msg) {
+    w = msg.args[0];
+    h = msg.args[1];
+    data = msg.args[2];
+
+        // check if buffer size is valid
+        if (depthImage.width !== w || depthImage.height !== h) {
+            console.log("buffer has been reinitialized");
+            depthImage = createImage(w, h);
+        }
+
+        // copy data
+        depthImage.loadPixels();
+
+        for(let i = 0; i < depthImage.pixels.length / 4; i++) {
+            let di = i * 4;
+            depthImage.pixels[di] = data[i];
+            depthImage.pixels[di+1] = data[i];
+            depthImage.pixels[di+2] = data[i];
+            depthImage.pixels[di+3] = data[i];
+        }
+        depthImage.updatePixels();
+    }
+</script>
+</body>
+</html>
