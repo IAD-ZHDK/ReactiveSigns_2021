@@ -15,7 +15,8 @@ function setup() {
 
 function draw() {
   background(0);
-  let index = floor(imagCount*posNormal.x); // find index position of image based on normal of position x
+  let normal = map(posNormal.x, 0.2, 0.8,0.0,1.0) // make sure we really get to the first and last frame 
+  let index = floor(imagCount*normal); // find index position of image based on normal of position x
   index = constrain(index,0,imagCount-1);
   // draw the same images on all three screens: 
   image(images[index],screen1.x,0,screen1.w,screen1.h); 

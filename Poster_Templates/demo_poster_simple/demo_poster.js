@@ -1,6 +1,6 @@
 
 //
-//  There are three screens (screen1, screen2, screen3), for which you can access the coordinates with the following variables. width/2 and height/2 can still be used in reference to the combined screen layout. 
+//There are three screens (screen1, screen2, screen3), for which you can access the coordinates with the following variables. width/2 and height/2 can still be used in reference to the combined screen layout. 
 //
 //screen1.x : x position of 1st screen
 //screen1.y : y position of 1st screen. Tip: this will always be 0! 

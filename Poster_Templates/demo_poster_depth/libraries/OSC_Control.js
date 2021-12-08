@@ -77,8 +77,8 @@ function updateDepthImage(msg) {
     let depthLength = depthW * depthH;
     for (let i = 0; i < depthLength; i++) {
       //let index = (i*w)+j;
-       dataFiltered[i] = int(dataFiltered[i]*0.9);
-       dataFiltered[i] += int(data[i]*0.1);
+       dataFiltered[i] = int(dataFiltered[i]*0.99);
+       dataFiltered[i] += int(data[i]*0.01);
     }
   } catch(e) {
     console.log("data not defined yet");

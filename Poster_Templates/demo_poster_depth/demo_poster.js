@@ -13,7 +13,7 @@ function draw() {
   background(0);
   lineEffect()
   //pixelEffect()
-  //circle(position.x,position.y,position.z*10);
+  //circle(width-position.x,position.y,100);
   ///////////////
   posterTasks(); // do not remove this last line!  
 }
@@ -28,7 +28,7 @@ function pixelEffect() {
     for (let j = 0; j<depthW; j+=2) {
       let index = (i*depthW)+j;
       if (dataFiltered[index] > 0.0) {
-        circle(spaceX*j, spaceY*i, 10);
+        rect(spaceX*j, spaceY*i, 5, 5);
       }
     }
   }
