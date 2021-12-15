@@ -94,6 +94,7 @@ document.addEventListener('fullscreenchange', (event) => {
 function resized() {
   resizeCanvas(getWindowWidth(), getWindowHeight());
   correctAspectRatio();
+  ortho();
   try {
     windowScaled();
   }   catch(e) {
@@ -118,8 +119,10 @@ function showPoint(pos) {
 
 function screenchange() {
   if (document.fullscreenElement) {
+    resized()
     console.log('Entering full-screen mode.');
   } else {
+    resized()
     console.log('Leaving full-screen mode.');
   }
 }
