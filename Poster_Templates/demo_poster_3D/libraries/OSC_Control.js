@@ -9,8 +9,10 @@ let depthW; // width of data array
 let depthH; // width of height array
 let position;// blob center 
 let posNormal// blob center normalised
+let trackingAtive = false;
 
 function setupOSC(depthEnabled) {
+  noCursor(); 
   enableDepthStream = depthEnabled;
   lastOSC = millis();
   position = createVector(0, 0, 0); 
@@ -60,7 +62,6 @@ function updatePosition(x,y,z) {
     posNormal.x += x*(1-factor);
     posNormal.y += y*(1-factor);
     posNormal.z += z*(1-factor);
-  
     position.set(posNormal);
     position.x = position.x*width;
     position.y = position.y*height;

@@ -119,15 +119,14 @@ function screenchange() {
 let fpsAverage = 0;
 
 function posterTasks() {
- 
   if (millis()-lastOSC>=2000) {
      // if there is no osc connection, then use mouse for position
      updatePosition(mouseX/width,mouseY/height,1.0)
-    oscSignal = false;
+     oscSignal = false;
   } else {
     oscSignal = true;
   }
-
+  mouseOverC = false;
   // show helplines when outside of fullscreenmode
   if (!fullscreen()) {
     push();
@@ -139,6 +138,8 @@ function posterTasks() {
     textAlign(LEFT, TOP);
     text("fps: "+Math.floor(fpsAverage), width*0.02, height*0.04);
     text("Streaming: "+oscSignal, width*0.02, height*0.07);
+    text("tracking: "+tracking, width*0.02, height*0.010);
+    
     noFill();
     stroke(0, 180, 180);
     rectMode(CORNER);

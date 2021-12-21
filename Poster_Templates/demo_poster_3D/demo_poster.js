@@ -72,3 +72,9 @@ function effect1() {
   box(vh*10);
   pop();
 }
+
+function windowScaled() {
+  if (_renderer.drawingContext instanceof WebGLRenderingContext) {
+    ortho();
+    }
+}

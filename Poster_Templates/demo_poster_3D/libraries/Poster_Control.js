@@ -94,7 +94,9 @@ document.addEventListener('fullscreenchange', (event) => {
 function resized() {
   resizeCanvas(getWindowWidth(), getWindowHeight());
   correctAspectRatio();
-  ortho();
+  if (_renderer.drawingContext instanceof WebGLRenderingContext) {
+    ortho(); // todo. delete this line once students code is updated
+    }
   try {
     windowScaled();
   }   catch(e) {
@@ -138,6 +140,7 @@ function posterTasks() {
   } else {
     oscSignal = true;
   }
+  
 
   // show helplines when outside of fullscreenmode
   if (!fullscreen()) {

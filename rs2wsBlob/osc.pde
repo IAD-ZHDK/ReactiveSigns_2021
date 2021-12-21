@@ -1,4 +1,4 @@
-void sendPImage(PImage image, PVector pos) {
+void sendPImage(PImage image, PVector pos, boolean tracking) {
   OscMessage msg = new OscMessage("/depth");
   msg.add(image.width);
   msg.add(image.height);
@@ -12,6 +12,7 @@ void sendPImage(PImage image, PVector pos) {
   msg.add(pos.x);
   msg.add(pos.y);
   msg.add(pos.z);
+  msg.add(tracking);
   try {
     ws.sendMessage(msg.getBytes());
   }

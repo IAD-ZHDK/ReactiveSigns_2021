@@ -24,6 +24,13 @@ final int WIDTH = 640;
 final int HEIGHT = 480;
 final int DECIMATION = 4;
 
+float cropY =  0.3;// percent
+float cropHeight =  0.5;// percent
+float cropX=  0.05;// percent
+float cropWidth = 0.9;// percent
+//final int blobY= floor((HEIGHT/DECIMATION)*0.3);
+//final int blobHeight = floor((HEIGHT/DECIMATION)*0.5);
+
 WebsocketServer ws;
 RealSenseCamera camera = new RealSenseCamera(this);
 RSThresholdFilter thresholdFilter;
@@ -36,7 +43,7 @@ float size = 0.5f;
 
 byte[] depthBuffer = null;
 boolean cameraRunning = false;
-
+boolean trackingAtive = false;
 int measured = 0;
 PImage defualtFrame;
 float filterRatio = .95f;
@@ -50,6 +57,7 @@ CSVDataStore CSVData;
 
 void setup() {
     size(640, 480, FX2D);
+    /*
     try{
       PrintStream o = new PrintStream(new File("movingPostersLog2021" + Calendar.DAY_OF_MONTH + "_" + Calendar.HOUR + "_" + Calendar.MINUTE + ".log"));
       System.setOut(o);
@@ -59,7 +67,7 @@ void setup() {
       println(e);
       println("no output stream");
     }
-    
+    */
   CSVData = new CSVDataStore(); // recover settings for distance camera
   try {
     // setup websocket
@@ -104,7 +112,7 @@ void setup() {
     cameraRunning = false;
   }
 
-  opencv = new OpenCV(this, WIDTH / DECIMATION, HEIGHT / DECIMATION);
+  opencv = new OpenCV(this, floor((WIDTH / DECIMATION)*cropWidth), floor((HEIGHT / DECIMATION) *cropHeight));  
 
   println("Sending data on: ws://localhost:" + PORT + "/");
 
@@ -122,26 +130,33 @@ void setup() {
     .setBroadcast(true)
     .setColorForeground(color(255, 40))
     .setColorBackground(color(255, 40));
-
   cp5.setFont(createFont("Courier", 10));
   defualtFrame = createImage(WIDTH / DECIMATION, HEIGHT / DECIMATION, RGB);
   animationFrame(defualtFrame);
-  
-
-  
 }
 
 void draw() {
   background(55);
 
   PImage depth = getDepthImage();
-  image(depth, 0, 0, width, height);
+  PImage depthCrop = depth.get(floor(depth.width*cropX), floor(depth.height*cropY), floor(depth.width*cropWidth), floor(depth.height*cropHeight));   
+  stroke(0,255,0);
+  image(depth, 0, 0, width, height); // need to fix this to match blobY and blobHeight
+  line(0,floor(height*cropY),width,floor(height*cropY));
+  line(0,floor(height*cropY)+floor(height*cropHeight),width,floor(height*cropY)+floor(height*cropHeight));
+  
+  line(floor(width*cropX),0,floor(width*cropX),height);
+  line(floor(width*cropX)+floor(width*cropWidth),0,floor(width*cropX)+floor(width*cropWidth),height);
+  
   // send image over websocket
   if (cameraRunning) {
-    blobTracking(depth);
-    drawBlobs(depth);
+    blobTracking(depthCrop);
+    drawBlobs(depthCrop);
+    push();
+    translate(floor(width*cropX),floor(height*cropY));
     stroke(0, 255, 0);
-    circle(singlePointAverage.x*width, singlePointAverage.y*height, singlePointAverage.z);
+    circle(singlePointAverage.x*depthCrop.width*DECIMATION, singlePointAverage.y*depthCrop.height*DECIMATION, singlePointAverage.z);
+    pop();
   } else {
     singlePointAverage.y = .5;
     singlePointAverage.x = sin(radians(frameCount))*0.3+0.5;
@@ -150,7 +165,7 @@ void draw() {
     fill(0, 255, 0);
     circle(singlePointAverage.x*width, singlePointAverage.y*height, singlePointAverage.z);
   }
-  sendPImage(depth, singlePointAverage);
+  sendPImage(depth, singlePointAverage, trackingAtive);
   // display information
   fill(55, 100);
   noStroke();
@@ -159,6 +174,7 @@ void draw() {
   textSize(20);
   text("Image Size: " + depth.width + " x " + depth.height, 30, 30);
   text("Serving: ws://localhost:" + PORT + "/", 30, 60);
+  text("trackingAtive: " + trackingAtive + "", 30, 90);
   surface.setTitle("Realsense 2 WebSocket - " + round(frameRate) + " FPS");
 }
 
@@ -175,9 +191,8 @@ PImage getDepthImage() {
 void drawBlobs(PImage depthImage) {
 
   PVector point = new PVector(0.5, 0.5, 0.01);//  set the point to middle of tracking area
-
   if (contours.size() > 0) {
-
+    trackingAtive = true; 
     float xAverage = 0;
     float yAverage = 0;
     float zAverage = 0;
@@ -185,16 +200,17 @@ void drawBlobs(PImage depthImage) {
     for (int i = 0; i<contours.size(); i++) {
       Contour biggestContour = contours.get(i);
       Rectangle r = biggestContour.getBoundingBox();
-
-      // adjust for image resolition 
+      // adjust for image resolution 
       float rx = r.x * DECIMATION;
       float ry = r.y * DECIMATION;
+      //ry += cropY*depthImage.height; 
       float rw = r.width * DECIMATION;
       float rh = r.height * DECIMATION;
-
       float diameter = (float)(rw+rh)/2; // todo: make this scalable 
       if (diameter >= 100) {
         //blob outer
+        push();
+        translate(floor(width*cropX),floor(height*cropY));
         noFill();
         strokeWeight(4);
         stroke(255, 0, 0);
@@ -207,26 +223,32 @@ void drawBlobs(PImage depthImage) {
         float z = (rw / r.width); // somewhat arbitrary division
         stroke(255, 0, 0);
         circle(x, y, z);
+        pop();
         // normalize all values
-        x = x / width;
-        y = y / height;
-
-        xAverage += x;
-        yAverage += y;
-        zAverage += z;
+        x = x / depthImage.width;
+        y = y / depthImage.height;
+        xAverage += x / DECIMATION;
+        yAverage += y / DECIMATION;
+        zAverage += z / DECIMATION;
         count++;
       }
     }  
     if (count>0) {
+     // there is more than one person! 
       xAverage = xAverage/count;
       yAverage = yAverage/count;
       zAverage = zAverage/count;
       point.set(xAverage, yAverage, zAverage);
+    //  stroke(255, 255, 0);
+     // circle(point.x*depthImage.width, point.y*depthImage.height, point.z);
       filterRatio = 0.95;
     } else {
+      // no blobs found
+      trackingAtive = false; 
       filterRatio = 0.98;
     }
-  }
+  } 
+ 
   /* calculate moveing weighted average of blobs */
   singlePointAverage.mult(filterRatio);
   singlePointAverage.add(point.mult(1-filterRatio));
