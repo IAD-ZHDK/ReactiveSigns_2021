@@ -18,7 +18,6 @@ function setupOSC(depthEnabled) {
   position = createVector(0, 0, 0); 
   posNormal = createVector(0, 0, 0); // normalised
 //
-  //const myCanvas = document.getElementById('defaultCanvas0');
   select('canvas').mouseOut(out);
   select('canvas').mouseOver(over);
   // init buffer

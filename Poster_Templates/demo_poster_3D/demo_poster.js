@@ -66,7 +66,6 @@ function effect1() {
   torus(vh*10, vh*5);
   pop();
 
-
   push();
   translate(screen3.cntX,screen3.cntY,0);
   rotateZ(frameCount * 0.001);

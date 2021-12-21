@@ -153,6 +153,7 @@ function posterTasks() {
     textAlign(LEFT, TOP);
     text("fps: "+Math.floor(fpsAverage), screen1.x+vw, screen1.y+vh);
     text("Streaming: "+oscSignal, screen1.x+vw, screen1.y+vh+vh+vh);
+    text("tracking: "+tracking, screen1.x+vw, screen1.y+vh+vh+vh+vh+vh);
     noFill();
     stroke(0, 180, 180);  
     rectMode(CORNER);

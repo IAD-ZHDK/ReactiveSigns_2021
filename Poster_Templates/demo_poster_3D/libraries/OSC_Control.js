@@ -9,14 +9,16 @@ let depthW; // width of data array
 let depthH; // width of height array
 let position;// blob center 
 let posNormal// blob center normalised
-let trackingAtive = false;
-
+let tracking; // if someone is infront of the camera 
+let mouseOverC;
 function setupOSC(depthEnabled) {
   noCursor(); 
   enableDepthStream = depthEnabled;
   lastOSC = millis();
   position = createVector(0, 0, 0); 
   posNormal = createVector(0, 0, 0); // normalised
+  select('canvas').mouseOut(out);
+  select('canvas').mouseOver(over);
   // init buffer
   // depthImage = createImage(160, 120);
   // setup OSC receiver
@@ -37,6 +39,18 @@ function setupOSC(depthEnabled) {
   }
   correctAspectRatio();
 }
+
+function out() {
+  if (oscSignal == false)  {
+    tracking = false;
+  }
+}
+function over() {
+  if (oscSignal == false)  {
+    tracking = true;
+  }
+}
+
 
 function updateOSC() {
   // reconnect osc
@@ -71,7 +85,7 @@ function updateDepthImage(msg) {
   lastOSC = millis();
   updatePosition(msg.args[3],msg.args[4],msg.args[5]);
   // depth data
- 
+  tracking = boolean(msg.args[6]);
   if (enableDepthStream) {
     depthW = msg.args[0];
     depthH = msg.args[1];
