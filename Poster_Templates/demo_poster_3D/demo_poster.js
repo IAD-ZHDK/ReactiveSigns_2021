@@ -12,8 +12,11 @@ function preload() {
 function setup() {
   createCanvas(getWindowWidth(), getWindowHeight(), WEBGL); // impartant! Don't modify this line. 
   ortho();
+ 
   setupOSC(false); // Don't remove this line. 1 argument to turn the depthstream on and off
   textFont(myFont); // impartant! WEBGL has no defualt font
+  let cam = createCamera();
+  console.log(cam)
 }
 
 function draw() {
