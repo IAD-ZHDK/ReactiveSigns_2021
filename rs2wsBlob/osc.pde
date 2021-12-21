@@ -12,7 +12,7 @@ void sendPImage(PImage image, PVector pos, boolean tracking) {
   msg.add(pos.x);
   msg.add(pos.y);
   msg.add(pos.z);
-  msg.add(tracking);
+  msg.add(int(tracking));
   try {
     ws.sendMessage(msg.getBytes());
   }
