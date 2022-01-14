@@ -11,7 +11,7 @@ function preload() {
 
 function setup() {
   createCanvas(getWindowWidth(), getWindowHeight(), WEBGL); // impartant! Don't modify this line. 
-  ortho();
+  //ortho();
  
   setupOSC(false); // Don't remove this line. 1 argument to turn the depthstream on and off
   textFont(myFont); // impartant! WEBGL has no defualt font
@@ -21,8 +21,8 @@ function setup() {
 
 function draw() {
   background(255,0,100);
-  effect1()
-  //effect2()
+  //effect1()
+  effect2()
   circle(position.x,position.y,10);
   posterTasks(); // do not remove this last line!  
 }
@@ -77,6 +77,6 @@ function effect1() {
 
 function windowScaled() {
   if (_renderer.drawingContext instanceof WebGLRenderingContext) {
-    ortho();
+   // ortho();
     }
 }

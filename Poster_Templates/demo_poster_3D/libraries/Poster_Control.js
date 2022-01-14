@@ -95,7 +95,7 @@ function resized() {
   resizeCanvas(getWindowWidth(), getWindowHeight());
   correctAspectRatio();
   if (_renderer.drawingContext instanceof WebGLRenderingContext) {
-    ortho(); // todo. delete this line once students code is updated
+   // ortho(); // todo. delete this line once students code is updated
     }
   try {
     windowScaled();

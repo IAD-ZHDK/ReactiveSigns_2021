@@ -1,4 +1,4 @@
-// realsense 2 websocket
+  // realsense 2 websocket
 // sends depth data from realsense to websockets
 // written 2021 by Florian Bruggisser
 // modified by Luke Franzke for the Reactive Signs Module, ZHdK
@@ -34,7 +34,7 @@ float cropWidth = 0.9;// percent
 WebsocketServer ws;
 RealSenseCamera camera = new RealSenseCamera(this);
 RSThresholdFilter thresholdFilter;
-
+boolean cameraFlip = true ;
 float minDistance = 0.0f;
 float maxDistance = 10.0f;
 float lowDistance = minDistance;
@@ -139,9 +139,21 @@ void draw() {
   background(55);
 
   PImage depth = getDepthImage();
+  if (cameraFlip) {
+   PGraphics g;
+    g = createGraphics(depth.width, depth.height);
+    g.beginDraw();
+    g.pushMatrix();
+    g.scale(1, -1);
+    g.translate(0, -g.height);
+    g.image(depth, 0, 0);
+    g.popMatrix();
+    g.endDraw();
+    depth = g.get();
+  }
   PImage depthCrop = depth.get(floor(depth.width*cropX), floor(depth.height*cropY), floor(depth.width*cropWidth), floor(depth.height*cropHeight));   
   stroke(0,255,0);
-  image(depth, 0, 0, width, height); // need to fix this to match blobY and blobHeight
+  image(depth, 0, 0, width, height); 
   line(0,floor(height*cropY),width,floor(height*cropY));
   line(0,floor(height*cropY)+floor(height*cropHeight),width,floor(height*cropY)+floor(height*cropHeight));
   
@@ -169,18 +181,20 @@ void draw() {
   // display information
   fill(55, 100);
   noStroke();
-  rect(0, 0, width, 100);
+  rect(0, 0, width, 130);
   fill(255);
-  textSize(20);
+  textSize(15);
   text("Image Size: " + depth.width + " x " + depth.height, 30, 30);
   text("Serving: ws://localhost:" + PORT + "/", 30, 60);
   text("trackingAtive: " + trackingAtive + "", 30, 90);
+  text("cameraFlip: " + cameraFlip + "", 30, 120);
+  
   surface.setTitle("Realsense 2 WebSocket - " + round(frameRate) + " FPS");
 }
 
 PImage getDepthImage() {
   if (cameraRunning) {
-    camera.readFrames();
+        camera.readFrames();
     return camera.getDepthImage();
   } else {
     animationFrame(defualtFrame);

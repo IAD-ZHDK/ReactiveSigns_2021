@@ -9,7 +9,7 @@ let depthW; // width of data array
 let depthH; // width of height array
 let position;// blob center 
 let posNormal// blob center normalised
-let tracking; // if someone is infront of the camera 
+let tracking = false; // if someone is infront of the camera 
 let mouseOverC;
 function setupOSC(depthEnabled) {
  // this.mouseOver(mouseOverCanvas);
