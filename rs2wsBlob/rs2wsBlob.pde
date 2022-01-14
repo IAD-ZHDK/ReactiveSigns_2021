@@ -177,7 +177,7 @@ void draw() {
     fill(0, 255, 0);
     circle(singlePointAverage.x*width, singlePointAverage.y*height, singlePointAverage.z);
   }
-  sendPImage(depth, singlePointAverage, trackingAtive);
+  sendPImage(depthCrop, singlePointAverage, trackingAtive);
   // display information
   fill(55, 100);
   noStroke();
