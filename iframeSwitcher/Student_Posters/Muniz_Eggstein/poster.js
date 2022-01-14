@@ -117,7 +117,6 @@ function setup() {
 
 
 function draw() {
-
   //shiftValue = position.x;
  // background(255,0,100);
   pointLight(255, 255, 255,  0, 200, 0)
@@ -125,11 +124,8 @@ function draw() {
   //directionalLight(255, 255, 255,  40, 40, -100)
   //circle(position.x,position.y,10);
   background(0);
-
   push();
-
   translate(-115.5*vw, -109*vh, -120*vh);
-
   push();
 
   // platziert bricks
@@ -193,7 +189,6 @@ function draw() {
     }else{
       translate(brickLengthWithSpace/2,0);
     }
-
     translate(0,brickHeightWithSpace);
   }
 

@@ -1,4 +1,3 @@
-
 // dataFiltered : represents an array of depth data. Only available with setupOSC(true)
 // depthW: The horizontal resolution of the dataFiltered aray
 // depthH: The vertical resolution of the dataFiltered aray
@@ -21,8 +20,8 @@ function setup() {
 
 function draw() {
   background(255,0,100);
-  //effect1()
-  effect2()
+  effect1()
+ // effect2()
   circle(position.x,position.y,10);
   posterTasks(); // do not remove this last line!  
 }
