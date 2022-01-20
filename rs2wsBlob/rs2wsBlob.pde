@@ -1,4 +1,4 @@
-  // realsense 2 websocket
+// realsense 2 websocket
 // sends depth data from realsense to websockets
 // written 2021 by Florian Bruggisser
 // modified by Luke Franzke for the Reactive Signs Module, ZHdK
@@ -18,22 +18,31 @@ ControlP5 cp5;
 
 Range range;
 
-final int PORT = 8025;
-
 final int WIDTH = 640;
 final int HEIGHT = 480;
 final int DECIMATION = 4;
-
+final boolean recording = false;
+boolean replaying = false;
+int recordingCount = 0; //frame count for exported images
+PImage[] recordingFrames;
+int totalFrames = 0;
+//
+// croping 
+//
 float cropY =  0.3;// percent
 float cropHeight =  0.5;// percent
 float cropX=  0.05;// percent
 float cropWidth = 0.9;// percent
-//final int blobY= floor((HEIGHT/DECIMATION)*0.3);
-//final int blobHeight = floor((HEIGHT/DECIMATION)*0.5);
-
+//
+// Websockets 
+//
+final int PORT = 8025;
 WebsocketServer ws;
 RealSenseCamera camera = new RealSenseCamera(this);
 RSThresholdFilter thresholdFilter;
+//
+// camera params 
+//
 boolean cameraFlip = true ;
 float minDistance = 0.0f;
 float maxDistance = 10.0f;
@@ -44,7 +53,6 @@ float size = 0.5f;
 byte[] depthBuffer = null;
 boolean cameraRunning = false;
 boolean trackingAtive = false;
-int measured = 0;
 PImage defualtFrame;
 float filterRatio = .95f;
 
@@ -54,20 +62,20 @@ PVector singlePointAverage = new PVector(0, 0);
 
 CSVDataStore CSVData;
 
-
 void setup() {
-    size(640, 480, FX2D);
-    /*
+  size(640, 480, FX2D);
+  frameRate(30);
+  /*
     try{
-      PrintStream o = new PrintStream(new File("movingPostersLog2021" + Calendar.DAY_OF_MONTH + "_" + Calendar.HOUR + "_" + Calendar.MINUTE + ".log"));
-      System.setOut(o);
-      System.setErr(o);
-      println("starting output stream");
-    }catch(FileNotFoundException e){
-      println(e);
-      println("no output stream");
-    }
-    */
+   PrintStream o = new PrintStream(new File("movingPostersLog2021" + Calendar.DAY_OF_MONTH + "_" + Calendar.HOUR + "_" + Calendar.MINUTE + ".log"));
+   System.setOut(o);
+   System.setErr(o);
+   println("starting output stream");
+   }catch(FileNotFoundException e){
+   println(e);
+   println("no output stream");
+   }
+   */
   CSVData = new CSVDataStore(); // recover settings for distance camera
   try {
     // setup websocket
@@ -79,7 +87,6 @@ void setup() {
   catch (Exception ex) {
     text("Error starting up websocket: " + ex.getMessage(), 30, 30);
   }
-
 
   try {
     // setup camera
@@ -110,6 +117,9 @@ void setup() {
   catch (Exception ex) {
     println("no camera available, sending default image");
     cameraRunning = false;
+    if (!recording) {
+      loadRecording();
+    }
   }
 
   opencv = new OpenCV(this, floor((WIDTH / DECIMATION)*cropWidth), floor((HEIGHT / DECIMATION) *cropHeight));  
@@ -135,12 +145,39 @@ void setup() {
   animationFrame(defualtFrame);
 }
 
+
+void loadRecording() {
+
+  for (int i=0; i<1000; i++) {
+    File f = dataFile("recordings/outputImage"+i+".jpg");
+    String filePath = f.getPath();
+    boolean exist = f.length()>100;
+    println(filePath, exist);
+    if (!exist) {
+      break;
+    }
+    totalFrames = i;
+  }
+  if (totalFrames >= 20) {
+    replaying = true;
+    recordingFrames = new PImage[totalFrames];
+    for (int i=0; i<recordingFrames.length; i++) {
+      try {
+        recordingFrames[i] = loadImage("recordings/outputImage"+i+".jpg");
+      } catch (Exception ex) {
+         totalFrames = i;
+         break;
+      }
+    }
+  }
+}
+
 void draw() {
   background(55);
-
   PImage depth = getDepthImage();
-  if (cameraFlip) {
-   PGraphics g;
+  if (cameraFlip && !replaying) {
+    //
+    PGraphics g;
     g = createGraphics(depth.width, depth.height);
     g.beginDraw();
     g.pushMatrix();
@@ -152,20 +189,21 @@ void draw() {
     depth = g.get();
   }
   PImage depthCrop = depth.get(floor(depth.width*cropX), floor(depth.height*cropY), floor(depth.width*cropWidth), floor(depth.height*cropHeight));   
-  stroke(0,255,0);
+  stroke(0, 255, 0);
   image(depth, 0, 0, width, height); 
-  line(0,floor(height*cropY),width,floor(height*cropY));
-  line(0,floor(height*cropY)+floor(height*cropHeight),width,floor(height*cropY)+floor(height*cropHeight));
-  
-  line(floor(width*cropX),0,floor(width*cropX),height);
-  line(floor(width*cropX)+floor(width*cropWidth),0,floor(width*cropX)+floor(width*cropWidth),height);
-  
+  line(0, floor(height*cropY), width, floor(height*cropY));
+  line(0, floor(height*cropY)+floor(height*cropHeight), width, floor(height*cropY)+floor(height*cropHeight));
+  line(floor(width*cropX), 0, floor(width*cropX), height);
+  line(floor(width*cropX)+floor(width*cropWidth), 0, floor(width*cropX)+floor(width*cropWidth), height);
+  //
+  // recording image for usage without camera
+  //
   // send image over websocket
-  if (cameraRunning) {
+  if (cameraRunning || replaying) {
     blobTracking(depthCrop);
     drawBlobs(depthCrop);
     push();
-    translate(floor(width*cropX),floor(height*cropY));
+    translate(floor(width*cropX), floor(height*cropY));
     stroke(0, 255, 0);
     circle(singlePointAverage.x*depthCrop.width*DECIMATION, singlePointAverage.y*depthCrop.height*DECIMATION, singlePointAverage.z);
     pop();
@@ -188,22 +226,32 @@ void draw() {
   text("Serving: ws://localhost:" + PORT + "/", 30, 60);
   text("trackingAtive: " + trackingAtive + "", 30, 90);
   text("cameraFlip: " + cameraFlip + "", 30, 120);
-  
   surface.setTitle("Realsense 2 WebSocket - " + round(frameRate) + " FPS");
+
+  // recording
+  if (recording) {
+    //savePath()
+    depth.save("data/recordings/outputImage"+recordingCount+".jpg");
+    recordingCount++;
+  }
 }
 
 PImage getDepthImage() {
   if (cameraRunning) {
-        camera.readFrames();
+    camera.readFrames();
     return camera.getDepthImage();
   } else {
-    animationFrame(defualtFrame);
+    if (!replaying) {
+      animationFrame(defualtFrame);
+    } else {
+      int frame = frameCount % totalFrames;
+      defualtFrame = recordingFrames[frame];
+    }
     return defualtFrame;
   }
 }
 
 void drawBlobs(PImage depthImage) {
-
   PVector point = new PVector(0.5, 0.5, 0.01);//  set the point to middle of tracking area
   if (contours.size() > 0) {
     trackingAtive = true; 
@@ -224,7 +272,7 @@ void drawBlobs(PImage depthImage) {
       if (diameter >= 100) {
         //blob outer
         push();
-        translate(floor(width*cropX),floor(height*cropY));
+        translate(floor(width*cropX), floor(height*cropY));
         noFill();
         strokeWeight(4);
         stroke(255, 0, 0);
@@ -248,13 +296,13 @@ void drawBlobs(PImage depthImage) {
       }
     }  
     if (count>0) {
-     // there is more than one person! 
+      // there is more than one person! 
       xAverage = xAverage/count;
       yAverage = yAverage/count;
       zAverage = zAverage/count;
       point.set(xAverage, yAverage, zAverage);
-    //  stroke(255, 255, 0);
-     // circle(point.x*depthImage.width, point.y*depthImage.height, point.z);
+      //  stroke(255, 255, 0);
+      // circle(point.x*depthImage.width, point.y*depthImage.height, point.z);
       filterRatio = 0.95;
     } else {
       // no blobs found
@@ -262,7 +310,7 @@ void drawBlobs(PImage depthImage) {
       filterRatio = 0.98;
     }
   } 
- 
+
   /* calculate moveing weighted average of blobs */
   singlePointAverage.mult(filterRatio);
   singlePointAverage.add(point.mult(1-filterRatio));
@@ -291,11 +339,11 @@ void animationFrame(PImage frame) {
   for (int i = 0; i < frame.pixels.length; i++) {
     int x = i % frame.width;
     int y = (i - x) / frame.height;
-    float reactorDistance = dist(x,y,width/2,height/2);
+    float reactorDistance = dist(x, y, width/2, height/2);
     int myStartTime = int(frameCount-reactorDistance);
     float angle = radians(myStartTime)*1.5;
     int fill = floor(sin(angle)*127)+127;  
-    fill = constrain(fill,0,255);
+    fill = constrain(fill, 0, 255);
     frame.pixels[i] = color(fill, fill, fill, 255);
   }
   frame.updatePixels();

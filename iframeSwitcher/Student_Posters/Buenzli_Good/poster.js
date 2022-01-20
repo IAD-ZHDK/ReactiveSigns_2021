@@ -64,14 +64,15 @@ function preload() {
 
 function setup() {
   //rectMode(CENTER);
-  canvas = createCanvas(getWindowWidth(), getWindowHeight());
+  createCanvas(getWindowWidth(), getWindowHeight());
   setupOSC(false); // The boolean argument turns the depthstream on and off$
-  
   useQuadTree(true);
+  setupWorld();
+}
 
+function setupWorld() {
   sheepsSprites = new Group();
   message.write();
-
   // you can't clone a multidimenional array in javascript
   let tempArr = message.getTextPoints();
   for (let row of tempArr) {
@@ -80,14 +81,13 @@ function setup() {
 
   for (let i = 0; i < sheepCount; i++) {
     let sheep = new Sheep(
-      random(width, width + 100),
+      random(width, width + width), // LUKE: changed this to work with more sheep
       random(100, height - 100),
       i
     );
     sheepsSprites.add(sheep.getSprite());
     sheeps.push(sheep);
   }
-
 }
 
 function draw() {
@@ -142,11 +142,23 @@ function coverMessage() {
   for (let i = 0; i < pointsEaten.length; i++) {
     push();
     noStroke();
-    //fill(0, 0, 200);
+    fill(0, 0, 200);
+    //fill(255);
     rectMode(CENTER);
     rect(pointsEaten[i].x, pointsEaten[i].y, vh * 12,vh * 12);
     pop();
   }
+  for (let j = 0; j < pointsNotEaten.length; j++) {
+    for (let i = 0; i < pointsNotEaten[j].length; i++) {
+      push();
+      noStroke();
+      fill(0, 255, 0);
+      //fill(255);
+      rectMode(CENTER);
+      rect(pointsNotEaten[j][i].x, pointsNotEaten[j][i].y, 2,2);
+      pop();
+    }
+}
 }
 
 function getNextPoint(id) {
@@ -184,6 +196,7 @@ function mapPointsToScreen(i) {
 function windowScaled() {
   // this is a custom event called whenever the poster is scaled
   textSize(10 * vw);
+ // setupWorld();
 }
 
 

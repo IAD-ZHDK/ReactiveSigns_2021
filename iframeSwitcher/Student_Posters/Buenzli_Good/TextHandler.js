@@ -3,7 +3,6 @@ class TextHandler {
     this.grases = [];
     this.textPoints = [];
     this.grassfont = loadFont("fonts/UniSansHeavyItalic.otf");
-
     this.messageImage = loadImage("images/Poster_1_small.png");
     this.pointsImage = loadImage("images/screenshot.png");
   }

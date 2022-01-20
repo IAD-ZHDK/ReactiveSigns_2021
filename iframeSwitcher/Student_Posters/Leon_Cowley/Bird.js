@@ -53,7 +53,7 @@ class Bird {
          if (oscSignal) {
              try {
              //use depth camera 
-                let depthX = depthW-floor((this.posX/width) * depthW)
+                let depthX = floor((this.posX/width) * depthW)
                 let depthY = floor((this.posY/height) * depthH)
                 let index = (depthY*depthW)+depthX;
                    if (dataFiltered[index] > 0.0) {

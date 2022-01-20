@@ -4,7 +4,7 @@ class Sheep {
     this.sprite = createSprite(x, y, 1000, 1000);
     this.sprite.scale = 0.004 * vh;
     this.sprite.maxSpeed = 3;
-    this.sprite.setCollider("circle", 0, 0, vh * 70);
+    this.sprite.setCollider("circle", 0, 0, vh * 30);
     this.animation = "walking";
     this.eatingTimer = 0;
     this.addSheepAnimation();
@@ -48,22 +48,26 @@ class Sheep {
     this.eatingTimer++;
 
     if (this.eatingTimer >= 200) {
-      //pushing eaten point in to points eaten array
-      if (this.arrayPosition.i != null) {
-        let point = pointsNotEaten[this.arrayPosition.i][this.arrayPosition.j];
-        pointsNotEaten[this.arrayPosition.i].splice(this.arrayPosition.j, 1);
-        if (typeof point != "undefined") {
-          pointsEaten.push({ x: point.x, y: point.y });
-        }
-      }
+     // this.eatenPointsHandler();
+      this.sprite.immovable = false;
+    }
+  }
 
-      // getting the next point to walk to
-      if (pointsNotEaten[this.id % 3].length > 0) {
-        this.arrayPosition = getNextPoint(this.id);
-        let goal = pointsNotEaten[this.arrayPosition.i][this.arrayPosition.j];
-
-        this.walk(goal);
+  eatenPointsHandler() {
+        //pushing eaten point in to points eaten array
+    if (this.arrayPosition.i != null) {
+      let point = pointsNotEaten[this.arrayPosition.i][this.arrayPosition.j];
+      pointsNotEaten[this.arrayPosition.i].splice(this.arrayPosition.j, 1);
+      if (typeof point != "undefined") {
+        pointsEaten.push({ x: point.x, y: point.y });
       }
+    }
+
+    // getting the next point to walk to
+    if (pointsNotEaten[this.id % 3].length > 0) {
+      this.arrayPosition = getNextPoint(this.id);
+      let goal = pointsNotEaten[this.arrayPosition.i][this.arrayPosition.j];
+      this.walk(goal);
     }
   }
 
@@ -74,6 +78,7 @@ class Sheep {
 
   eat() {
     this.animation = "eating";
+    this.sprite.immovable = true;
     this.sprite.velocity.x = 0;
     this.sprite.velocity.y = 0;
     this.updateAnimation();
@@ -120,7 +125,7 @@ class Sheep {
     if (this.distance(this.goalX, this.goalY) <= vh * 0.5) {
       this.sprite.velocity.x = 0;
       this.sprite.velocity.y = 0;
-    }
+    } 
   }
 
   addSheepAnimation() {

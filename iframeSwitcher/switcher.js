@@ -24,6 +24,6 @@ function pickPoster(number) {
   }
 }
 
-setInterval(changePoster, 70000);
+setInterval(changePoster, 120000);
 
 //document.addEventListener('keypress', pickPoster, true);
