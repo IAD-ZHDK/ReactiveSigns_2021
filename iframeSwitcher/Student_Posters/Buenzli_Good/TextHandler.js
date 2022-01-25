@@ -29,12 +29,20 @@ class TextHandler {
       screen1.x + vw * 6,
       screen1.cntY - screen1.cntY / 2.2
     );
+    /*
+    for (let j = 0; j < this.textPoints.length; j++) {
+      for (let i = 0; i < this.textPoints[j].length; i++) {
+          this.textPoints[j][i].alpha = 0;
+          console.log(this.textPoints[j][i])
+      }
+    }
+*/
   }
 
   pushTextPoints(word, x, y) {
     this.textPoints.push(
       this.grassfont.textToPoints(word, x, y, 16 * vw, {
-        sampleFactor: 0.01,
+        sampleFactor: 0.04, // 0.01
         simplifyThreshold: 0,
       })
     );

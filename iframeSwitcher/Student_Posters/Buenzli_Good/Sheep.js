@@ -4,18 +4,23 @@ class Sheep {
     this.sprite = createSprite(x, y, 1000, 1000);
     this.sprite.scale = 0.004 * vh;
     this.sprite.maxSpeed = 3;
-    this.sprite.setCollider("circle", 0, 0, vh * 30);
+    this.sprite.setCollider("circle", 0, 0, vh * 35);
     this.animation = "walking";
     this.eatingTimer = 0;
     this.addSheepAnimation();
 
-    let l = pointsNotEaten[this.id % 3].length;
-    let rando = random(l - l / 3, l);
-    let goal = pointsNotEaten[this.id % 3][floor(rando)];
+   // let l = pointsNotEaten[this.id % 3].length;
+  //  let rando = random(l - l / 3, l);
+    //let goal = pointsNotEaten[this.id % 3][floor(rando)];
+    //this.arrayPosition = { i: this.id % 3, j: floor(rando) };
+    //this.goalX = goal.x;
+    //this.goalY = goal.y;
 
-    this.arrayPosition = { i: this.id % 3, j: floor(rando) };
-    this.goalX = goal.x;
-    this.goalY = goal.y;
+//this.arrayPosition = getNextPoint(this.id);
+//let goal = pointsNotEaten[this.arrayPosition.i][this.arrayPosition.j];
+let goal = getNextPoint(this.id, true);
+this.goalX = goal.x;
+this.goalY = goal.y;
 
     if (id % 2 == 0) {
       this.ethnic = "b";
@@ -24,14 +29,18 @@ class Sheep {
     }
   }
 
-  invasion() {
+  draw() {
     this.sprite.depth = this.sprite.position.y*10;
     if (this.animation == "walking") {
       this.walking();
     } else if (this.animation == "eating") {
       this.eating();
-    }
+    } else if (this.animation == "follow") {
+      this.folowing();
+    } 
     this.updateAnimation();
+  //  textSize(40);
+    //text(this.animation, this.sprite.position.x, this.sprite.position.y)
   }
 
   walking() {
@@ -43,32 +52,42 @@ class Sheep {
     }
   }
 
+  folowing() {
+    this.mirrorDirection();
+    this.sprite.attractionPoint(0.05, position.x, position.y);
+    if (this.distance(this.goalX, this.goalY) <= vh * 0.5) {
+      this.sprite.velocity.x = 0;
+      this.sprite.velocity.y = 0;
+    } 
+  }
+
   eating() {
     this.sprite.mass = 0.5;
     this.eatingTimer++;
 
-    if (this.eatingTimer >= 200) {
-     // this.eatenPointsHandler();
+    if (this.eatingTimer >= 150) { //200
+      this.eatenPointsHandler();
       this.sprite.immovable = false;
     }
   }
 
   eatenPointsHandler() {
-        //pushing eaten point in to points eaten array
-    if (this.arrayPosition.i != null) {
-      let point = pointsNotEaten[this.arrayPosition.i][this.arrayPosition.j];
-      pointsNotEaten[this.arrayPosition.i].splice(this.arrayPosition.j, 1);
-      if (typeof point != "undefined") {
-        pointsEaten.push({ x: point.x, y: point.y });
-      }
-    }
-
+     //pushing eaten point in to points eaten array
+   // if (this.arrayPosition.i != null) {
+      pointsEaten.push({ x: this.goalX , y: this.goalY });
+    //}
     // getting the next point to walk to
-    if (pointsNotEaten[this.id % 3].length > 0) {
-      this.arrayPosition = getNextPoint(this.id);
-      let goal = pointsNotEaten[this.arrayPosition.i][this.arrayPosition.j];
-      this.walk(goal);
-    }
+    //if (pointsNotEaten[this.id % 3].length > 0) {
+      let goal = getNextPoint(this.id);
+      //this.arrayPosition = getNextPoint(this.id);
+      //let goal = pointsNotEaten[this.arrayPosition.i][this.arrayPosition.j];
+     // let point = pointsNotEaten[this.arrayPosition.i][this.arrayPosition.j];
+      if (goal.x == 0 && goal.y == 0) {
+        this.follow()
+      } else {
+        this.walk(goal);
+      }
+   // }
   }
 
   goToPoint(x, y) {
@@ -113,19 +132,14 @@ class Sheep {
   }
 
   // End of grass eating
-  sheepFollowMouse() {
+  follow() {
+    this.sprite.setCollider("circle", 0, 0, vh * 60);
     this.sprite.depth = this.sprite.position.y*10;
-    this.animation = "walking";
+    this.animation = "follow";
     this.sprite.maxSpeed = 1;
     this.updateAnimation();
-
     this.mirrorDirection();
     this.sprite.attractionPoint(0.05, position.x, position.y);
-
-    if (this.distance(this.goalX, this.goalY) <= vh * 0.5) {
-      this.sprite.velocity.x = 0;
-      this.sprite.velocity.y = 0;
-    } 
   }
 
   addSheepAnimation() {
@@ -139,5 +153,11 @@ class Sheep {
 
     this.sprite.addAnimation(
       "walkingb",walkingb);
+
+    this.sprite.addAnimation(
+        "followw",walkingw);
+  
+      this.sprite.addAnimation(
+        "followb",walkingb);
   }
 }

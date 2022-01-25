@@ -5,6 +5,7 @@ let message;
 let canvas;
 
 let pointsEaten = [];
+let totalEatingPoints = 0;
 let pointsNotEaten = [];
 let allEaten = false;
 
@@ -71,6 +72,7 @@ function setup() {
 }
 
 function setupWorld() {
+  // Luke: Curently this doesn't work to have additonal calls to this function after resize.
   sheepsSprites = new Group();
   message.write();
   // you can't clone a multidimenional array in javascript
@@ -81,24 +83,22 @@ function setupWorld() {
 
   for (let i = 0; i < sheepCount; i++) {
     let sheep = new Sheep(
-      random(width, width + width), // LUKE: changed this to work with more sheep
+      random(width+vw * 5, width + width), // LUKE: changed this to work with more sheep
       random(100, height - 100),
       i
     );
     sheepsSprites.add(sheep.getSprite());
     sheeps.push(sheep);
   }
+
+  totalEatingPoints = pointsNotEaten[0].length+pointsNotEaten[1].length + pointsNotEaten[2].length
 }
 
 function draw() {
   background(255);
   
-  allEaten =
-    pointsNotEaten[0].length +
-      pointsNotEaten[1].length +
-      pointsNotEaten[2].length ==
-    0;
-
+  //allEaten = pointsEaten.length >= totalEatingPoints;
+  allEaten = false;
   message.drawImage(
     vw * 5,
     vh * 5,
@@ -119,10 +119,9 @@ function draw() {
       }
     }
   }
- drawSprites();
- 
 
-  
+   drawSprites();
+ 
   //===============================================
   posterTasks(); // do not remove this last line!
   //saveCanvas(canvas,"screenshot","png");
@@ -130,53 +129,69 @@ function draw() {
 
 function sheepWalking() {
    // Luke: draw sprites in order from top to bottom for better overlaping 
-  //sheeps.sort((a, b) => (a.x > b.x) ? 1 : (a.x === b.x) ? ((a.y > b.y) ? 1 : -1) : -1 )
   for (let j = 0; j < sheeps.length; j++) {
-    sheeps[j].invasion();
-   // sheeps[j].sprite.draw();
+    sheeps[j].draw();
+    // sheeps[j].sprite.draw();
     //drawSprites();
   }
 }
 
 function coverMessage() {
+  
   for (let i = 0; i < pointsEaten.length; i++) {
     push();
     noStroke();
-    fill(0, 0, 200);
-    //fill(255);
+   // fill(0, 0, 200);
+    fill(255);
     rectMode(CENTER);
-    rect(pointsEaten[i].x, pointsEaten[i].y, vh * 12,vh * 12);
+    rect(pointsEaten[i].x, pointsEaten[i].y, vh * 4.5,vh * 4.5);
     pop();
   }
+  /*
   for (let j = 0; j < pointsNotEaten.length; j++) {
     for (let i = 0; i < pointsNotEaten[j].length; i++) {
-      push();
-      noStroke();
-      fill(0, 255, 0);
-      //fill(255);
-      rectMode(CENTER);
-      rect(pointsNotEaten[j][i].x, pointsNotEaten[j][i].y, 2,2);
-      pop();
+        push();
+        noStroke();
+        fill(0, 255, 0);
+        //fill(255);
+        rectMode(CENTER);
+        rect(pointsNotEaten[j][i].x, pointsNotEaten[j][i].y, 10,10);
+        pop();
     }
 }
+*/
 }
 
-function getNextPoint(id) {
+function getNextPoint(id, randomPoint) {
+  
   let i = id % 3;
   let j;
 
-  if (pointsNotEaten[i].length < 10) {
+  if (pointsNotEaten[i].length < 10 || randomPoint) {
     j = floor(random(pointsNotEaten[i].length));
   } else {
     j = mapPointsToScreen(i);
   }
 
   // fred likes to act out
-  if (id % sheeps.length == 0) {
-    j = floor(random(pointsNotEaten[i].length));
-  }
+  //if (id % sheeps.length == 0) {
+ //   j = floor(random(pointsNotEaten[i].length));
+ // }
+ //i = floor(random(pointsNotEaten.length));
+ // j = floor(random(pointsNotEaten[i].length));
 
-  return { i: i, j: j };
+let temp = pointsNotEaten[i][j];
+let goal;
+
+if (typeof temp === 'undefined') {
+   goal = {x:0, y:0, z:0};
+   console.log(goal);
+} else {
+  goal = {x:temp.x, y:temp.y, z:temp.z};
+// remove eaten point from array
+  pointsNotEaten[i].splice(j, 1);
+}
+return goal;
 }
 
 function mapPointsToScreen(i) {
