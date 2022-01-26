@@ -1,0 +1,75 @@
+.loader { position:relative; height: 100%; width: 100%} 
+.dot { 
+  transform-origin: 50% 50%; 
+  height: 1.5vw; 
+  width: 1.5vw; 
+  border-radius : 50%; 
+  top: 0; 
+  background-color: #a7a7a7; 
+  position: absolute; 
+  -webkit-animation:vertical-movement 2.5s infinite ease-in-out; 
+  -moz-animation:vertical-movement 2.5s infinite ease-in-out; 
+  -ms-animation:vertical-movement 2.5s infinite ease-in-out; 
+  -o-animation:vertical-movement 2.5s infinite ease-in-out; 
+  animation:vertical-movement 2.5s infinite ease-in-out; } 
+  #d1 {
+    left:16.66%;
+    top:50%;
+    -webkit-animation-delay:-0.3s;
+    -moz-animation-delay:-0.3s;
+    -ms-animation-delay:-0.3s;
+    -o-animation-delay:-0.3s;
+    animation-delay:-0.3s;} 
+    #d2 {
+    left:50%;
+    top:50%;
+    -webkit-animation-delay:-0.6s;
+    -moz-animation-delay:-0.6s;
+     -ms-animation-delay:-0.6s;
+    -o-animation-delay:-0.6s;
+     animation-delay:-0.6s;}
+    #d3 {
+      left:83.33%;
+      top:50%;
+      -webkit-animation-delay:-0.9s;
+      -moz-animation-delay:-0.9s;
+      -ms-animation-delay:-0.9s;
+      -o-animation-delay:-0.9s;
+      animation-delay:-0.9s;
+      }
+    @keyframes vertical-movement { 
+      0%,100% { -webkit-transform: translateY(-200%); opacity: .5;} 
+      50% { -webkit-transform: translateY(200%); opacity: .2;} 
+    } 
+
+  body {
+    padding:
+      0;
+    margin:
+      0;
+    background:
+      #000000;
+    height: 100%;
+    position:relative;
+    overflow: hidden;
+    width: 100%;
+    }
+canvas {
+    display:
+      block;
+    position:
+      absolute;
+    left:
+      50%;
+    top:
+      50%;
+    transform:
+      translate(-50%, -50%);
+    width:
+      50%;
+    height:
+      50%;
+    text-align:
+      center;
+    z-index: 1000;
+}

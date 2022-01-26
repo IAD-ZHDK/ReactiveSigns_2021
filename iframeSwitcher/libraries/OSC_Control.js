@@ -2,14 +2,14 @@
 const port = 8025;
 const osc = new OSC();
 let enableDepthStream = true;
-let lastOSC= 0;
+let lastOSC = 0;
 let data; // array of depth data
 let dataFiltered; 
 let depthW; // width of data array
 let depthH; // width of height array
 let position;// blob center 
 let posNormal// blob center normalised
-let tracking; // if someone is infront of the camera 
+let tracking = false; // if someone is infront of the camera 
 let mouseOverC;
 function setupOSC(depthEnabled) {
   noCursor(); 

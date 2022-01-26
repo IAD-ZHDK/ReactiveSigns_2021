@@ -1,6 +1,6 @@
 let sheeps = [];
 let sheepsSprites;
-let sheepCount = 60; //12
+let sheepCount = 80; //12
 let message;
 let canvas;
 
@@ -14,6 +14,7 @@ let eatingw;
 let eatingb;
 let walkingw;
 let walkingb;
+let trackinFlag = false;
 
 function preload() {
   message = new TextHandler();
@@ -105,18 +106,22 @@ function draw() {
     screen1.w * 3 - vw * 10,
     screen1.h - vh * 10
   );
+  
 
-  sheepsSprites.displace(sheepsSprites);
+  sheepsSprites.displace(sheepsSprites,colisionCheck);
 
-  if (position.x != 0) {
+  if (tracking == true && trackinFlag == false) {
+    trackinFlag = true;
+  }
+  if (trackinFlag) {
     if (!allEaten) {
       coverMessage();
       sheepWalking();
     } else {
-      background(255);
-      for (let j = 0; j < sheeps.length; j++) {
-        sheeps[j].sheepFollowMouse();
-      }
+     // background(255);
+     // for (let j = 0; j < sheeps.length; j++) {
+    //    sheeps[j].sheepFollowMouse();
+    //  }
     }
   }
 
@@ -127,10 +132,25 @@ function draw() {
   //saveCanvas(canvas,"screenshot","png");
 }
 
+function colisionCheck(spriteA, spriteB) {
+  // avoid chaotic behavour when trying to follow the mouse
+  let distance1 = dist(spriteA.position.x, spriteA.position.y, position.x, position.y)
+  let distance2 = dist(spriteB.position.x, spriteB.position.y, position.x, position.y)
+  if (distance1<=vh*20) {
+      if (distance1>distance2) {
+      // spriteA.debug = true;
+        spriteA.velocity.mult(0.3);
+      } else {
+      // spriteB.debug = true;
+        spriteB.velocity.mult(0.4);
+      }
+  }
+}
 function sheepWalking() {
    // Luke: draw sprites in order from top to bottom for better overlaping 
   for (let j = 0; j < sheeps.length; j++) {
     sheeps[j].draw();
+    
     // sheeps[j].sprite.draw();
     //drawSprites();
   }
@@ -144,10 +164,10 @@ function coverMessage() {
    // fill(0, 0, 200);
     fill(255);
     rectMode(CENTER);
-    rect(pointsEaten[i].x, pointsEaten[i].y, vh * 4.5,vh * 4.5);
+    rect(pointsEaten[i].x, pointsEaten[i].y, vw * 5.2,vh * 6.1);
     pop();
   }
-  /*
+ /*
   for (let j = 0; j < pointsNotEaten.length; j++) {
     for (let i = 0; i < pointsNotEaten[j].length; i++) {
         push();
@@ -155,11 +175,12 @@ function coverMessage() {
         fill(0, 255, 0);
         //fill(255);
         rectMode(CENTER);
-        rect(pointsNotEaten[j][i].x, pointsNotEaten[j][i].y, 10,10);
+        rect(poinstsNotEaten[j][i].x, pointsNotEaten[j][i].y, 10,10);
         pop();
     }
 }
 */
+
 }
 
 function getNextPoint(id, randomPoint) {

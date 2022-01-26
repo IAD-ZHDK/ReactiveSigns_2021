@@ -17,3 +17,6 @@ When the sheep finished the only walk around. Here could the next poster apear.
 
 There are maybe some improvments happening over the holidays ;)
 
+Luke: Fix that the sheeps don't move before anyone enters the screen. 
+Fix that the sheep don't move so hectic when folowing the position
+

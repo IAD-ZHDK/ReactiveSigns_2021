@@ -4,7 +4,7 @@ class Sheep {
     this.sprite = createSprite(x, y, 1000, 1000);
     this.sprite.scale = 0.004 * vh;
     this.sprite.maxSpeed = 3;
-    this.sprite.setCollider("circle", 0, 0, vh * 35);
+    this.sprite.setCollider("circle", 0, 0, vh * 40);
     this.animation = "walking";
     this.eatingTimer = 0;
     this.addSheepAnimation();
@@ -39,7 +39,7 @@ this.goalY = goal.y;
       this.folowing();
     } 
     this.updateAnimation();
-  //  textSize(40);
+    // textSize(40);
     //text(this.animation, this.sprite.position.x, this.sprite.position.y)
   }
 
@@ -53,6 +53,7 @@ this.goalY = goal.y;
   }
 
   folowing() {
+    this.sprite.mass = 1;
     this.mirrorDirection();
     this.sprite.attractionPoint(0.05, position.x, position.y);
     if (this.distance(this.goalX, this.goalY) <= vh * 0.5) {
@@ -65,7 +66,7 @@ this.goalY = goal.y;
     this.sprite.mass = 0.5;
     this.eatingTimer++;
 
-    if (this.eatingTimer >= 150) { //200
+    if (this.eatingTimer >= 120) { //200
       this.eatenPointsHandler();
       this.sprite.immovable = false;
     }

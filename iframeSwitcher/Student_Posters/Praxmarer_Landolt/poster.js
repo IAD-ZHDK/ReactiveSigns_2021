@@ -168,7 +168,7 @@ function windowScaled() {
   ortho();
   hcylinderspacing = vh;
   wcylinderspacing = vw;
-  cylinderHeight = height/3.5;
+  cylinderHeight = height*0.31; // Originaly: height/3.5;
   cylinderRadius = (screen1.w/4)-hcylinderspacing;
   textTexture1 = createGraphics((PI*cylinderRadius*2),cylinderHeight);
   textTexture1.background(200);

@@ -158,7 +158,7 @@ function showPoint(pos) {
 }
 
 function posterTasks() {
- 
+  
   if (millis()-lastOSC>=2000) {
      // if there is no osc connection, then use mouse for position
     updatePosition(mouseX/width,mouseY/height,1.0)
@@ -166,6 +166,12 @@ function posterTasks() {
   } else {
     oscSignal = true;
   }
+  
+  try {
+    window.parent.trackingCallback(tracking);
+  }   catch(e) {
+  }
+
 
   // show helplines when outside of fullscreen mode
   //(window.innerWidth == screen.width && window.innerHeight == screen.height)
