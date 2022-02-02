@@ -1,6 +1,6 @@
 let parent = 'Student_Posters/'
 let indexFile ='/index.html'
-let posters = ['Buenzli_Good','Ascic_Lohmann','Janthasom_Hommel','Leon_Cowley','Naegeli_Ziegler','Praxmarer_Landolt','Walther_Bischoff', 'Muniz_Eggstein']
+let posters = ['Buenzli_Good','Ascic_Lohmann','Janthasom_Hommel','Leon_Cowley','Naegeli_Ziegler','Praxmarer_Landolt','Walther_Bischoff', 'Muniz_Eggstein2D']
 let posterCount = 0
 let intervalTime = 180000; //3 minutes s
 let trackingActive = false;
