@@ -120,7 +120,7 @@ let fpsAverage = 0;
 
 function posterTasks() {
  
-  if (millis()-lastOSC>=2000) {
+  if (millis()-lastOSC>=400) {
      // if there is no osc connection, then use mouse for position
      updatePosition(mouseX/width,mouseY/height,1.0)
     oscSignal = false;

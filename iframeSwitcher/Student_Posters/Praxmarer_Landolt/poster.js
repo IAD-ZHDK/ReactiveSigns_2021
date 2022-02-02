@@ -37,7 +37,6 @@ function setup() {
   textFont(myFont); // impartant! WEBGL has no defualt font
   windowScaled();
   angleMode(DEGREES);
-
 }
 
 function setupCylenders() {

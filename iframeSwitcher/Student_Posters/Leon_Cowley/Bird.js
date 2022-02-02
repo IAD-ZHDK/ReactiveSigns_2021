@@ -63,7 +63,7 @@ class Bird {
                 }
          } else {
            // use pointer 
-            if (abs(position.x-this.posX) <= vh) { 
+            if (dist(position.x,position.y, this.posX, this.posY) <= vh*20) { 
                 activeated = true
             }
          }

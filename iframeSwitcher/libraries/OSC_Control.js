@@ -12,10 +12,10 @@ let posNormal// blob center normalised
 let tracking = false; // if someone is infront of the camera 
 let mouseOverC;
 function setupOSC(depthEnabled) {
-  noCursor(); 
-  removeElementsByClass("loader");
+  //noCursor(); 
+  fadIn()
   enableDepthStream = depthEnabled;
-  lastOSC = millis();
+  lastOSC = window.performance.now();
   position = createVector(0, 0, 0); 
   posNormal = createVector(0, 0, 0); // normalised
   // workaround for mouse outside of canvas
@@ -42,12 +42,7 @@ function setupOSC(depthEnabled) {
   correctAspectRatio();
 }
 
-function removeElementsByClass(className){
-  const elements = document.getElementsByClassName(className);
-  while(elements.length > 0){
-      elements[0].parentNode.removeChild(elements[0]);
-  }
-}
+
 function out() {
   if (oscSignal == false)  {
     tracking = false;
@@ -59,7 +54,20 @@ function over() {
   }
 }
 
-
+function fadIn(){
+  try {
+    let fader = document.getElementById('loader');
+    fader.classList.toggle('fadeIn');
+    removeElementsByClass("dot");
+  }   catch(e) {
+  }
+}
+function removeElementsByClass(className){
+  const elements = document.getElementsByClassName(className);
+  while(elements.length > 0){
+      elements[0].parentNode.removeChild(elements[0]);
+  }
+}
 function updateOSC() {
   // reconnect osc
   console.log("tryosc")

@@ -1,12 +1,4 @@
-// dataFiltered : represents an array of depth data. Only available with setupOSC(true)
-
-// depthW: The horizontal resolution of the dataFiltered aray
-
-// depthH: The vertical resolution of the dataFiltered aray
-
-// stolenlaw
-
-
+      let camera, scene, raycaster, renderer; 
 
 let brickLength;
 let brickLengthWithSpace;
@@ -21,11 +13,9 @@ let totalHeight;
 let bricks = [];
 isLetter = false;
 let shiftValue =0;
-let canvas;
 let onlyLetters = []
-let brickTextTexture;
 let brickLetters =[
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   [0,0,0,1,1,0,0,1,1,1,1,1,1,0,0,1,1,0,0,1,0,0,0,0,0,1,1,1,1,1,0,1,0,0,0,1,0,0,1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1],
   [0,0,1,0,1,0,0,0,0,1,0,0,0,0,1,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,1,0,0,0,0,0,1,1,0,0,1,0,0,0,0,0,1],
   [0,0,1,0,0,1,0,0,0,1,1,0,0,0,1,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,1,1,0,0,1,0,0,1,0,0,0,0,0,1,0,1,0,0,1,0,0,0,0,1],
@@ -90,194 +80,114 @@ let brickLetters =[
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
 
 
-let myFont;
-function preload() {
-    myFont = loadFont('barlow_condensed.otf');
-}
 
-function setup() {
-  canvas = createCanvas(getWindowWidth(),getWindowHeight(), WEBGL); // impartant! Don't modify this line.
-  setupOSC(true); // Don't remove this line. 1 argument to turn the depthstream on and off
-  textFont(myFont); // impartant! WEBGL has no defualt font  //
-  //brick = new Brick(brickLength);
-  //brick1 = new Brick(25);
-  //brickLength = 2.7*vw;
+      document.addEventListener('DOMContentLoaded', function() {
+          const canvasContainer =  window.document.getElementsByTagName('body')[0]
+          canvasContainer.appendChild( renderer.domElement );
+       }, false);
 
- //brickLengthWithSpace =brickLength/10+brickLength;
-  //brickHeightWithSpace = (brickLength/2)/10+(brickLength/2);
+	
 
-  brickRows = brickLetters.length;
-  brickColumns = brickLetters[0].length; // use 64
-  brickLengthWithSpace = width/brickColumns;
-  brickLength = brickLengthWithSpace-(brickLengthWithSpace/10);
-  brickHeightWithSpace = height/brickRows;
-  brickHeight = brickHeightWithSpace-(brickHeightWithSpace/10);
-  //brickHeight = brickLength/2;
-  brickDeep = brickHeight/2;
-  totalWidth = brickColumns*brickLengthWithSpace;
-  totalHeight = (brickRows+1)*(brickHeightWithSpace);
-  noStroke();
-  fill(255);
-  for(let k = 0; k < brickRows; k++){
-    for(let i = 0; i < brickColumns; i++){
-      if(brickLetters[k][i] == 1){
-        let x = brickLengthWithSpace*i + (k%2 * -brickLengthWithSpace/2)
-        let y = brickHeightWithSpace*k 
-        let cordinates = [x,y]; // x, y, offset
-        onlyLetters.push(cordinates)
-      }
-    }
-  }
-  console.log(brickRows);
-  ortho();
+      function init() {
+        brickLength = 2.7*vh;
+        brickLengthWithSpace = (brickLength/10) +brickLength;
+        brickHeightWithSpace = ((brickLength/2)/10) +(brickLength/2);
+        brickRows = brickLetters.length;
+        brickColumns = brickLetters[2].length; // use 64
+        brickHeight = brickLength/2;
+        brickDeep = brickHeight/2;
+        totalWidth = brickColumns* brickLengthWithSpace;
+        totalHeight = brickRows*brickHeightWithSpace;
+       
+         scene = new THREE.Scene();    
+         scene.background = new THREE.Color( 0x114400 );
+         renderer = new THREE.WebGLRenderer();
+         renderer.setSize(getWindowWidth(), getWindowHeight() );
+         renderer.setPixelRatio(window.devicePixelRatio * 1.5);
+         const axesHelper = new THREE.AxesHelper( 5 ); 
+         scene.add( axesHelper );
+         camera = new THREE.PerspectiveCamera( 45, getWindowWidth() / getWindowHeight(), 0.1, 1000 );
+         const geometry1 = new THREE.PlaneGeometry(brickLength, brickHeight);
+         const geometry2 = new THREE.BoxGeometry(brickLength, brickHeight, brickDeep);
+         const material = new THREE.MeshBasicMaterial( { color: 0x00ffaa } );
+   
+         camera.position.x = totalWidth/2;
+         camera.position.y =  -totalHeight/2;
+         camera.position.z = 120;
 
+         const light = new THREE.AmbientLight( 0xf0f0f0 ); // soft white light
+          //scene.add( light );
 
- //brickTextTexture.image(img1, 0, 0, textTexture1.width, cylinderHeight);
-  // createBrickImage()
- setBackgroundCSS() 
-}
+          const light2 = new THREE.PointLight( 0xffffff, 50, 170 );
+          light2.position.set( 40, -80, 5);
+          scene.add( light2 );
 
-
-function setBackgroundCSS()  {
-  //const canvas =  document.getElementsByClassName("p5Canvas");
- // cnv.id('mycanvas');
-  console.log("canvas"+canvas.id());
-  document.getElementById(canvas.id()).style.backgroundImage = "url('background.png')";
-  document.getElementById(canvas.id()).style.backgroundSize = "100% 100%";
-}
-
-function createBrickImage() {
- // crate 2d texture of non moving bricks
- brickTextTexture = createGraphics(width*5,height*5);
- brickTextTexture.background(0);
-
- let W_Spaced = brickTextTexture.width/brickColumns;
- let W = W_Spaced-(W_Spaced/10);
- let H_Spaced = brickTextTexture.height/brickRows;
- let H = H_Spaced-(H_Spaced/10);
-
- for(let k = 0; k < brickRows; k++){
-  for(let i = 0; i < brickColumns; i++){
-      let x = W_Spaced*i +(k%2 * -W_Spaced/2)
-      let y = H_Spaced*k 
-     // fill(255,0,0)
-      brickTextTexture.rect(x,y,W,H)
-    }
-}
-brickTextTexture.save('background.png');
-}
-
-function draw() {
-  clear();
-  //push()
-  // image(brickTextTexture);
-  //plane(brickTextTexture.width, brickTextTexture.height);
-  //pop();
-  pointLight(255, 255, 255,  0, 200, 0)
-  directionalLight(255, 255, 255,  40, 40, -100)
-  push()
-  translate(-totalWidth/2, -totalHeight/2);
-  for(let i = 0; i < onlyLetters.length; i++){
-    push()
-    let x = onlyLetters[i][0];
-    let y = onlyLetters[i][1];
-    let depth = getDepth(x,y);
-    translate(x, y, depth);
-    //plane(brickLength, brickHeight);
-    box(brickLength, brickHeight, brickDeep)
-    pop();
-  }
-pop();
-
-  posterTasks(); // do not remove this last line!  
-}
-
-function getDepth(x, y) {
-  let depth = 0
-  if (oscSignal)  {
-    try {
-    //newPosition = width - position.x; ////////// LUKE: added to invert when using the
-       let depthX = floor((x/width) * depthW)
-       let depthY = floor((y/height) * depthH)
-       let index = (depthY*depthW)+depthX;
-          if (dataFiltered[index] > 0.0) {
-              depth = dataFiltered[index] * 1.4;           
-          }
-    } catch (e) {
-    }
-  } else {
-      depth = dist(position.x,position.y,x,y)*0.10 
-    }
-  return depth;
-}
-
-function drawOld() {
-  //shiftValue = position.x;
-  // background(255,0,100);
-  pointLight(255, 255, 255,  0, 200, 0)
-  //directionalLight(255, 255, 255,  40, 40, -100)
-  //directionalLight(255, 255, 255,  40, 40, -100)
-  //circle(position.x,position.y,10);
-  background(0);
-  push();
-  translate(-115.5*vw, -109*vh, -120*vh);
-  push();
-  // platziert bricks
-  for(let k = 0; k < brickColumns; k++){
-    for(let i = 0; i < brickRows; i++){
-      let letter = false;
-      push();
-      if(i < 55 && k < 63){ //use 55 and 63
-        if(brickLetters[k][i] == 1){
-        //  translate(0,0,-(shiftValue));
-        letter = true;
-        }
-      }
-      if (oscSignal)  {
-        try {
-        //newPosition = width - position.x; ////////// LUKE: added to invert when using the
-           let depthX = depthW-floor((i/brickRows) * depthW)
-           let depthY = floor((k/brickColumns) * depthH)
-           let index = (depthY*depthW)+depthX;
-              if (dataFiltered[index] > 0.0) {
-               // newPosition
-                if (letter == true) {
-                  //fill(0)
-                  translate(0,0,-dataFiltered[index]);              // change factor to 2000 for the bricks to disappear
-                } else{
+          for(let k = 0; k < brickRows; k++){
+            for(let i = 0; i < brickColumns; i++){
+              let myColor = 0xaaaaaa; 
+          
+                let x = brickLengthWithSpace*i +(k%2 * -brickLengthWithSpace/2)
+                let y = brickHeightWithSpace*k 
+                let cordinates = [x,y]; // x, y, offset
+              
+                let object;
+                if(brickLetters[k][i] == 1){
+                   object = new THREE.Mesh( geometry2, new THREE.MeshLambertMaterial( { color: myColor } ) );
+                   onlyLetters.push(object)
+                } else {
+                   object = new THREE.Mesh( geometry1, new THREE.MeshLambertMaterial( { color: myColor } ) );
                 }
+                object.position.x = x;
+                object.position.y = -y;
+                object.position.z = 0;
+                scene.add( object );
+
               }
-        }catch (e) {
-        }
-      } else {
-        if (letter == true) {
-          let brickX = i*brickLengthWithSpace;
-          let brickY = k*brickHeightWithSpace;
-          let distance = dist(position.x,position.y,brickX,brickY)*0.01
-          translate(0,0,-distance);    
-        }
+            }
+          console.log(onlyLetters.length);
       }
-  
-      //brick.place();
-      box(brickLength, brickHeight, brickDeep)
-      pop();
- 
-      translate(brickLengthWithSpace, 0);
-    }
-    // macht, dass alle brickRows am gleichen Ort beginnen
-    translate(-brickRows*brickLengthWithSpace,0);
 
-    // versetzte brick reihen
-    if(k%2 == 0){
-      translate(-brickLengthWithSpace/2,0);
-    }else{
-      translate(brickLengthWithSpace/2,0);
-    }
-    translate(0,brickHeightWithSpace);
-  }
+			function animate() {
+				requestAnimationFrame( animate );
+        
+        for(let i = 0; i < onlyLetters.length; i++){
+           let depth = getDepth(onlyLetters[i].position);
+           onlyLetters[i].position.z = depth;
+        }
+				renderer.render( scene, camera );
+			};
+      init();
+			animate();
 
-  pop();
-  pop();
+      function windowScaled() { // this is a custom event called whenever the poster is scalled
+        //renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.setSize(getWindowWidth(), getWindowHeight());
+        //camera = new THREE.PerspectiveCamera( 45, getWindowWidth() / getWindowHeight(), 0.1, 1000 );
+       // camera = new THREE.PerspectiveCamera( 75, getWindowWidth() / getWindowHeight(), 0.1, 1000 );
+			//	camera.updateProjectionMatrix();
+      }
 
-  posterTasks(); // do not remove this last line!  
-}
+      function getDepth(vector) {
+        let depth = 0
+        if (oscSignal)  {
+          try {
+          //newPosition = width - position.x; ////////// LUKE: added to invert when using the
+             let depthX = depthW-floor((vector.x/width) * depthW)
+             let depthY = floor((vector.y/height) * depthH)
+             let index = (depthY*depthW)+depthX;
+                if (dataFiltered[index] > 0.0) {
+                    depth = dataFiltered[index];              // change factor to 2000 for the bricks to disappea
+                }
+          } catch (e) {
+          }
+        } else {
+            depth = getDistance(posNormal.x,posNormal.y,vector.x,vector.y)*0.010 
+          }
+        return depth;
+      }
+
+      function getDistance(xA, yA, xB, yB) { 
+        let xDiff = xA - xB; 
+        let yDiff = yA - yB; 
+        return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+      }

@@ -6,6 +6,7 @@ let intervalTime = 180000; //3 minutes s
 let trackingActive = false;
 
 
+
 function trackingCallback(tracking) {
   trackingActive = tracking
 }
@@ -19,6 +20,8 @@ function changePoster() {
   } else {
     posterCount = 0;
   }
+  let fader = document.getElementById('fader');
+  fader.classList.toggle('fadein');
 }
 
 function pickPoster(number) {
@@ -26,21 +29,32 @@ function pickPoster(number) {
   console.log("poster no: "+number)
   if (number-1 < posters.length-1 && number-1 >= 0) {
     posterCount = number-1;
-    changePoster()
+    //changePoster() 
+    transition()
   }
 }
 
+function transition() {
+  try {
+    let iframe = document.getElementById('posterFrame');
+    let iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+    let fader = iframeDocument.getElementById('loader');
+    fader.classList.toggle('fadeout');
+  }   catch(e) {
+  }
+ setTimeout(changePoster, 2000);
+}
 
 function intervalHandler(){
-
    if (trackingActive == false || typeof trackingActive === 'undefined') {
     clearInterval(myInterval);
     myInterval = setInterval(intervalHandler, intervalTime)
-    changePoster()
+    //changePoster()
+    transition()
    } else {
-    // skip change if someone is in front of poster, try again after 400 milis 
+    // skip change if someone is in front of poster, try again after delay 
     clearInterval(myInterval);
-    myInterval = setInterval(intervalHandler, 400);
+    myInterval = setInterval(intervalHandler, 700);
     //console.log("tracking: "+ trackingActive);
    }
 }

@@ -1,4 +1,3 @@
-
 let oscSignal = false;// osc signal
 let fullscreenMode = false;
 // helper variables for scalable positioning
@@ -18,24 +17,24 @@ function correctAspectRatio() {
   let offsetX = 0;
   let offsetY = 0;
   if (_renderer.drawingContext instanceof WebGLRenderingContext) {
-    offsetX = - floor(width/2)
-    offsetY = - floor(height/2)
+    offsetX = - Math.floor(width/2)
+    offsetY = - Math.floor(height/2)
   }
-  screen1.w = floor(width/3);
+  screen1.w = Math.floor(width/3);
   screen1.h = height;
   screen1.x = offsetX;
   screen1.y = offsetY;
   screen1.cntX = screen1.x + screen1.w/2;
   screen1.cntY = screen1.y + screen1.h/2; 
   //
-  screen2.w = floor(width/3);
+  screen2.w = Math.floor(width/3);
   screen2.h = height;
-  screen2.x = offsetX + floor(width/3);
+  screen2.x = offsetX + Math.floor(width/3);
   screen2.y = offsetY;
   screen2.cntX = (screen2.w/2)+screen2.x;
   screen2.cntY = (screen2.h/2)+screen2.y; 
   //
-  screen3.w = floor(width/3);
+  screen3.w = Math.floor(width/3);
   screen3.h = height;
   screen3.x = offsetX+(floor(width/3)*2);
   screen3.y = offsetY;
@@ -53,14 +52,14 @@ function getWindowWidth() {
   let aspectRatioWH = pageWidth/pageHeight; // width to height
   let aspectRatioHW = pageHeight/pageWidth; // height to width
 
-  let currentRatio = windowWidth/windowHeight;
+  let currentRatio = window.innerWidth/window.innerHeight;
 
-  if (windowWidth < windowHeight*aspectRatioWH) {
+  if (window.innerWidth < window.innerHeight*aspectRatioWH) {
     // for portrait mode
-    posterWidth = windowWidth;
+    posterWidth = window.innerWidth;
   } else {
     // for landscape mode
-    posterWidth = floor(windowHeight*aspectRatioWH);
+    posterWidth = Math.floor(window.innerHeight*aspectRatioWH);
   }
   return posterWidth;
 }
@@ -69,21 +68,21 @@ function getWindowHeight() {
   
   let aspectRatioWH = pageWidth/pageHeight; // width to height
   let aspectRatioHW = pageHeight/pageWidth; // height to width
-  if (windowWidth < windowHeight*aspectRatioWH) {
+  if (window.innerWidth < window.innerHeight*aspectRatioWH) {
     // for portrait mode
-    posterHeight = floor(windowWidth*aspectRatioHW);
+    posterHeight = Math.floor(window.innerWidth*aspectRatioHW);
   } else {
     // for landscape mode
-    posterHeight = windowHeight;
+    posterHeight = window.innerHeight;
   }
-  console.log("windowWidth = "+windowWidth+" displaywidth = "+displayWidth);
-  console.log("windowHeight = "+windowHeight+" displayHeight = "+displayHeight);
-  if (windowWidth == displayWidth || windowHeight == displayHeight) {
+  //console.log("windowWidth = "+window.innerWidth+" displaywidth = "+displayWidth);
+  //console.log("windowHeight = "+window.innerHeight+" displayHeight = "+displayHeight);
+  if (window.innerHeight == screen.height) {
     fullscreenMode = true;
   } else {
     fullscreenMode = false;
   }
-  console.log(_renderer._curCamera);
+  //console.log(_renderer._curCamera);
   console.log("fullscreenMode = "+fullscreenMode);
   return posterHeight;
   
