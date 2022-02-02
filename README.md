@@ -11,4 +11,4 @@ The processing (JAVA) application requires the following libraries:
 
 Live Demo:
 
-https://iad-zhdk.github.io/ReactiveSigns_2021/
+https://iad-zhdk.github.io/ReactiveSigns_2021/iframeSwitcher/
