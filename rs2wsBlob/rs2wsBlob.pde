@@ -1,4 +1,4 @@
-// realsense 2 websocket
+  // realsense 2 websocket
 // sends depth data from realsense to websockets
 // written 2021 by Florian Bruggisser
 // modified by Luke Franzke for the Reactive Signs Module, ZHdK
@@ -18,11 +18,13 @@ ControlP5 cp5;
 
 Range range;
 
+boolean demoAlowed = true;
+boolean editable = false;
 final int WIDTH = 640;
 final int HEIGHT = 480;
 final int DECIMATION = 4;
-final boolean recording = false;
-boolean replaying = false;
+final boolean recording = false; // used for creating demo footage
+boolean replaying = false; // reply emo footage
 int recordingCount = 0; //frame count for exported images
 PImage[] recordingFrames;
 int totalFrames = 0;
@@ -31,7 +33,7 @@ int totalFrames = 0;
 //
 float cropY =  0.3;// percent
 float cropHeight =  0.5;// percent
-float cropX=  0.05;// percent
+float cropX =  0.05;// percent
 float cropWidth = 0.9;// percent
 //
 // Websockets 
@@ -65,18 +67,62 @@ CSVDataStore CSVData;
 void setup() {
   size(640, 480, FX2D);
   frameRate(30);
-  /*
-    try{
-   PrintStream o = new PrintStream(new File("movingPostersLog2021" + Calendar.DAY_OF_MONTH + "_" + Calendar.HOUR + "_" + Calendar.MINUTE + ".log"));
-   System.setOut(o);
-   System.setErr(o);
-   println("starting output stream");
-   }catch(FileNotFoundException e){
-   println(e);
-   println("no output stream");
-   }
-   */
   CSVData = new CSVDataStore(); // recover settings for distance camera
+  setupOSC();
+  setupCamera();
+  
+  opencv = new OpenCV(this, floor((WIDTH / DECIMATION)*cropWidth), floor((HEIGHT / DECIMATION) *cropHeight));  
+  println("Sending data on: ws://localhost:" + PORT + "/");
+  // GUI
+  cp5 = new ControlP5(this);
+  range = cp5.addRange("rangeController")
+    // disable broadcasting since setRange and setRangeValues will trigger an event
+    .setBroadcast(false)
+    .setPosition(20, height-40)
+    .setSize(floor(width*0.8), 20)
+    .setHandleSize(20)
+    .setRange(minDistance, maxDistance)
+    .setRangeValues(lowDistance, highDistance)
+    // after the initialization we turn broadcast back on again
+    .setBroadcast(true);
+  cp5.setFont(createFont("Courier", 10));
+
+    
+    // toggle for allowing adjustments with gui
+ cp5.addToggle("toggle")
+     .setPosition(20, height-90)
+     .setSize(50,20)
+     .setValue(false)
+     .setMode(ControlP5.SWITCH)
+     .setCaptionLabel("Allow Edits")
+     ;
+  // for demo without camera
+  defualtFrame = createImage(WIDTH / DECIMATION, HEIGHT / DECIMATION, RGB);
+  animationFrame(defualtFrame);
+}
+
+void toggle(boolean theFlag) {
+   editable = theFlag;
+   setLock(cp5.getController("rangeController"),theFlag);
+  println("a toggle event.");
+}
+
+void setLock(Controller theController, boolean theValue) {
+
+  if (theValue) {
+      theController.setColorBackground(color(255, 40));
+      theController.setColorForeground(0xff003652);
+  } else {
+    theController.setColorBackground(color(100, 100));
+    theController.setColorForeground(color(100, 40));
+  }
+
+  //theController.setMouseOver(false);
+  theController.setLock(!theValue); 
+}
+
+boolean setupOSC() {
+  
   try {
     // setup websocket
     ws = new WebsocketServer(this, PORT, "/");
@@ -85,8 +131,15 @@ void setup() {
   }
 
   catch (Exception ex) {
-    text("Error starting up websocket: " + ex.getMessage(), 30, 30);
+    println("Error starting up websocket: " + ex.getMessage(), 30, 30);
+    return false;
   }
+  return true;
+}
+
+
+boolean setupCamera() {
+
 
   try {
     // setup camera
@@ -108,46 +161,29 @@ void setup() {
   catch (Exception ex) {
     fill(255);
     textSize(20);
-    text("Error starting up: " + ex.getMessage(), 30, 30);
+    println("Error starting up realsense: " + ex.getMessage(), 30, 30);
   }
 
   try {
     println("number devices available: "+RealSenseCamera.isDeviceAvailable());
   }
   catch (Exception ex) {
-    println("no camera available, sending default image");
-    cameraRunning = false;
-    if (!recording) {
-      loadRecording();
+    println("no camera available");
+    if (demoAlowed) {
+      cameraRunning = false;
+      if (!recording) {
+        loadRecording();
+      }
+    } else {
+      return false;
     }
   }
-
-  opencv = new OpenCV(this, floor((WIDTH / DECIMATION)*cropWidth), floor((HEIGHT / DECIMATION) *cropHeight));  
-
-  println("Sending data on: ws://localhost:" + PORT + "/");
-
-  // GUI
-  cp5 = new ControlP5(this);
-  range = cp5.addRange("rangeController")
-    // disable broadcasting since setRange and setRangeValues will trigger an event
-    .setBroadcast(false)
-    .setPosition(20, height-40)
-    .setSize(floor(width*0.8), 20)
-    .setHandleSize(20)
-    .setRange(minDistance, maxDistance)
-    .setRangeValues(lowDistance, highDistance)
-    // after the initialization we turn broadcast back on again
-    .setBroadcast(true)
-    .setColorForeground(color(255, 40))
-    .setColorBackground(color(255, 40));
-  cp5.setFont(createFont("Courier", 10));
-  defualtFrame = createImage(WIDTH / DECIMATION, HEIGHT / DECIMATION, RGB);
-  animationFrame(defualtFrame);
+  
+  return true;
 }
 
 
 void loadRecording() {
-
   for (int i=0; i<1000; i++) {
     File f = dataFile("recordings/outputImage"+i+".jpg");
     String filePath = f.getPath();
@@ -173,6 +209,46 @@ void loadRecording() {
 }
 
 void draw() {
+  if (cameraRunning || demoAlowed)  {
+  drawCamara();
+  } else {
+    drawError();
+  }
+}
+
+void mousePressed() {
+  if (editable && keyPressed) {
+    if (key == 'a' || key == 'A') {
+          cropY =  float(mouseY)/height;// percent
+          cropX =  float(mouseX)/width;// percent
+    }
+    if (key == 's' || key == 'S') {
+          cropHeight =  (float(mouseY)/height)-cropY;// percent
+          cropWidth =  (float(mouseX)/width)-cropX;// percent
+    }
+    /*
+    
+    float cropY =  0.3;// percent
+float cropHeight =  0.5;// percent
+float cropX =  0.05;// percent
+float cropWidth = 0.9;// percent
+    */
+  }
+}
+
+
+void drawError() {
+  background(255,0,0);
+  fill(55, 100);
+  noStroke();
+  rect(0, 0, width, 130);
+  fill(255);
+  textSize(25);
+  text("Error starting camera \n1. Check the connection \n2. Close this window and restart computer", 30, 30);
+  surface.setTitle("Realsense 2 WebSocket - " + round(frameRate) + " FPS");
+}
+
+void drawCamara() {
   background(55);
   PImage depth = getDepthImage();
   if (cameraFlip && !replaying) {
@@ -191,6 +267,11 @@ void draw() {
   PImage depthCrop = depth.get(floor(depth.width*cropX), floor(depth.height*cropY), floor(depth.width*cropWidth), floor(depth.height*cropHeight));   
   stroke(0, 255, 0);
   image(depth, 0, 0, width, height); 
+   if (editable) {
+     stroke(0xff08a2cf);
+   } else {
+     stroke(0xff003652);
+   }
   line(0, floor(height*cropY), width, floor(height*cropY));
   line(0, floor(height*cropY)+floor(height*cropHeight), width, floor(height*cropY)+floor(height*cropHeight));
   line(floor(width*cropX), 0, floor(width*cropX), height);
@@ -227,6 +308,12 @@ void draw() {
   text("trackingAtive: " + trackingAtive + "", 30, 90);
   text("cameraFlip: " + cameraFlip + "", 30, 120);
   surface.setTitle("Realsense 2 WebSocket - " + round(frameRate) + " FPS");
+  if (editable) {
+    fill(0xff08a2cf);
+     text("'a' + click to set top-left", 300, 30);
+     text("'s' + click to set btm-right", 300, 50);
+     text("restart required after edit", 300, 80);
+  }
 
   // recording
   if (recording) {

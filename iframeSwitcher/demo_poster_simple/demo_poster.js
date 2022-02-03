@@ -35,21 +35,25 @@ function setup() {
   setupOSC(false);  // impartant! Don't remove this line. The boolean argument turns the depthstream on and off
   textFont(font);
   textAlign(CENTER,CENTER);
-  textSize(10*vw);
+  textSize(5*vw);
 }
 
 function draw() {
   background(0,0,0,20);
 	fill(255);
-  wordEffect("stop", screen1.cntX, screen1.cntY);
-  wordEffect("hate", screen2.cntX, screen2.cntY);
-  wordEffect("speech", screen3.cntX, screen3.cntY);
+ // wordEffect("", screen1.cntX, screen1.cntY);
+ if (!oscSignal) {
+  wordEffect("Check \n camera \n connection \n and restart", screen2.cntX, screen2.cntY);
+ } else {
+  wordEffect("loading..", screen2.cntX, screen2.cntY);
+ }
+  //wordEffect("", screen3.cntX, screen3.cntY);
   ////////////////
   posterTasks(); // do not remove this last line!  
 } 
 
 function windowScaled() { // this is a custom event called whenever the poster is scalled
-  textSize(10*vw);
+  textSize(5*vw);
 }
 
 function wordEffect(word,x,y) {

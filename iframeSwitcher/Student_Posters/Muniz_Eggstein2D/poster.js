@@ -139,7 +139,7 @@ function setupBricks() {
       if(brickLetters[k][i] == 1){
         let x = brickLengthWithSpace*i + (k%2 * -brickLengthWithSpace/2)
         let y = brickHeightWithSpace*k 
-        let cordinates = [x,y]; // x, y, offset
+        let cordinates = [x,y,0]; // x, y, offset
         onlyLetters.push(cordinates)
       }
     }
@@ -190,10 +190,19 @@ function draw() {
   for(let i = onlyLetters.length-1; i >= 0; i--){
  // for(let i = 0; i < onlyLetters.length; i++){
    //console.log(i);
-
+   let depth = 0;
     let x = onlyLetters[i][0];
     let y = onlyLetters[i][1];
-    let depth = getDepth(x,y);
+    if(tracking==true){
+      depth = getDepth(x,y);
+    } else {
+      depth = 0;
+      //depth = (sin(radians(i+frameCount))*10)+10;
+    }
+    let average = onlyLetters[i][2]*0.9;
+    average += depth*0.1;
+    onlyLetters[i][2] = average;
+    depth = average 
    // translate(x, y);
     //plane(brickLength, brickHeight);
     //2.5D effect 
@@ -201,14 +210,6 @@ function draw() {
     quad(x, y, x, y+brickHeight, x+depth, y+brickHeight+depth, x+depth, y+depth);
     fill(200);
     quad(x, y, x+depth, y+depth, x+brickLength+depth, y+depth, x+brickLength, y);
-   /* beginShape();
-    vertex(x, y);
-    vertex(x, y+brickHeight);
-    vertex(x+depth, y+brickHeight+depth);
-    vertex(x+brickLength+depth, y+depth);
-    vertex(x+brickLength, y);
-    endShape();
-    */
     fill(255)
     x += depth;
     y += depth;

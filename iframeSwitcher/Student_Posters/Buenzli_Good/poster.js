@@ -206,7 +206,7 @@ let goal;
 
 if (typeof temp === 'undefined') {
    goal = {x:0, y:0, z:0};
-   console.log(goal);
+   // console.log(goal);
 } else {
   goal = {x:temp.x, y:temp.y, z:temp.z};
 // remove eaten point from array

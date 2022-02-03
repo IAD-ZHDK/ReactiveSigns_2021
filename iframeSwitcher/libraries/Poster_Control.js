@@ -167,7 +167,7 @@ function posterTasks() {
   }
   
   try {
-    window.parent.trackingCallback(tracking);
+    window.parent.trackingCallback(tracking, oscSignal);
   }   catch(e) {
   }
 
