@@ -1,13 +1,14 @@
 let parent = 'Student_Posters/'
 let indexFile ='/index.html'
-let posters = ['Buenzli_Good','Ascic_Lohmann','Leon_Cowley','Naegeli_Ziegler','Praxmarer_Landolt','Walther_Bischoff']
+let posters = ['Janthasom_Hommel' , 'Muniz_Eggstein2D', 'Buenzli_Good','Ascic_Lohmann','Leon_Cowley','Naegeli_Ziegler','Praxmarer_Landolt','Walther_Bischoff']
 let testPoster = "demo_poster_simple/index.html"
-// not used: 'Janthasom_Hommel' , 'Muniz_Eggstein2D'
+// not used: 
 let posterCount = 0
 let intervalTime = 180000; //3 minutes s
 let trackingActive = false;
 let startedFlag = false;
 let streaming = false;
+let demoMode = true
 
 
 
@@ -60,7 +61,7 @@ function transition() {
 
 function intervalHandler(){
   console.log("streaming"+streaming+", trackingActive"+trackingActive+", startedFlag"+startedFlag)
-   if (streaming && (!trackingActive || !startedFlag)) {
+   if (demoMode || (streaming && (!trackingActive || !startedFlag)) ) {
     startedFlag = true;
     clearInterval(myInterval);
     myInterval = setInterval(intervalHandler, intervalTime)

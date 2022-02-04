@@ -39,7 +39,7 @@ function setup() {
 }
 
 function draw() {
-  background(0,0,0,20);
+  background(0,0,0,70);
 	fill(255);
  // wordEffect("", screen1.cntX, screen1.cntY);
  if (!oscSignal) {
@@ -62,7 +62,7 @@ function wordEffect(word,x,y) {
   // rect(textBounds.x, textBounds.y, textBounds.w, textBounds.h);
   push()
     translate(x, y);
-    rotate(posNormal.x*3*PI);
+    //rotate(posNormal.x*3*PI);
     text(word,0,0)
   pop();
 }

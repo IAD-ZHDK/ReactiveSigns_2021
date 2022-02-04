@@ -77,6 +77,7 @@ function getWindowHeight() {
   }
   //console.log("windowWidth = "+window.innerWidth+" displaywidth = "+displayWidth);
   //console.log("windowHeight = "+window.innerHeight+" displayHeight = "+displayHeight);
+
   if (window.innerHeight == screen.height) {
     fullscreenMode = true;
   } else {
@@ -94,6 +95,7 @@ document.addEventListener('fullscreenchange', (event) => {
   // the value of the property is null.
   if (document.fullscreenElement) {
     console.log(`Element: ${document.fullscreenElement.id} entered full-screen mode.`);
+    fullscreenMode = true;
     resized();  
   } else {
     console.log('Leaving full-screen mode.');
@@ -174,9 +176,9 @@ function posterTasks() {
 
   // show helplines when outside of fullscreen mode
   //(window.innerWidth == screen.width && window.innerHeight == screen.height)
-  if (!fullscreenMode ) {
-      if (_renderer.drawingContext instanceof WebGLRenderingContext) {
-      
+  let debug = false;
+  if (!fullscreenMode && debug) {
+      if (_renderer.drawingContext instanceof WebGLRenderingContext) {s
         translate(0,0,200);
       }
       push();

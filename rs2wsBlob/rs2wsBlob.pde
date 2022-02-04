@@ -285,8 +285,8 @@ void drawCamara() {
     drawBlobs(depthCrop);
     push();
     translate(floor(width*cropX), floor(height*cropY));
-    stroke(0, 255, 0);
-    circle(singlePointAverage.x*depthCrop.width*DECIMATION, singlePointAverage.y*depthCrop.height*DECIMATION, singlePointAverage.z);
+    fill(0xff08a2cf);
+    circle(singlePointAverage.x*depthCrop.width*DECIMATION, singlePointAverage.y*depthCrop.height*DECIMATION, singlePointAverage.z*10);
     pop();
   } else {
     singlePointAverage.y = .5;

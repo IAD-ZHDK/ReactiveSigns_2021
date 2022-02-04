@@ -168,7 +168,7 @@ function createBrickImage() {
  let H = H_Spaced-(H_Spaced/10);
 
  for(let k = 0; k < brickRows; k++){
-  for(let i = 0; i < brickColumns+1; i++){
+  for(let i = 0; i < brickColumns+2; i++){
       let x = W_Spaced*i +(k%2 * -W_Spaced/2)
       let y = H_Spaced*k 
      // fill(255,0,0)
@@ -184,6 +184,7 @@ function draw() {
   // image(brickTextTexture);
   //plane(brickTextTexture.width, brickTextTexture.height);
   //pop();
+  translate(vh,0)
   image(brickTextTexture,0,0)
  
   //translate(-totalWidth/2, -totalHeight/2);

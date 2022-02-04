@@ -33,10 +33,10 @@ function setup() {
 }
 
 function draw() {
-
-  _frame = int(position.x/(width/_frameAmount));
+  let invertedPosX = (width-position.x)
+  _frame = _frameAmount-int(invertedPosX/(width/_frameAmount));
   if(tracking==false){
-    _frame = 0;
+    _frame = _frameAmount;
   }
 
   background(_bg);
