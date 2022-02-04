@@ -84,9 +84,7 @@ animateStanding(posX, posY) {
     translate(posX, posY-(vh*0.25))
    // triangle(p0x, p0y, p2x, p2y, p1x, p1y);
     rotate(PI/4);
-    if (this.extra == true) {
-      fill(255,0,0);
-    }
+
     
     rect(0,0, vh*0.4, vh*0.4);
     pop();
@@ -111,12 +109,9 @@ let p2y = this.flap*(vh*0.4);
     // fill of bird is dependent on flap cycle
     push()
     translate(posX, posY-(vh*0.25))
-    if (this.extra == true) {
-      fill(255,0,0);
-    } else {
-    
+  
     fill(map(sin(this.flap), -1, 1, 180, 240));
-    }
+    
     // wings 
     triangle(p0x, p0y, p1x, p1y, p2x, p2y);
     // body 

@@ -34,7 +34,11 @@ function setup() {
 
 function draw() {
   let invertedPosX = (width-position.x)
-  _frame = _frameAmount-int(invertedPosX/(width/_frameAmount));
+   // Luke: added larger non-active space at start and end 
+  let newPosition = constrain(invertedPosX, 0+(vw*6), width-(vw*6));
+  newPosition = map(newPosition, 0+(vw*6), width-(vw*6), 0, width);
+
+  _frame = _frameAmount-int(newPosition/(width/_frameAmount));
   if(tracking==false){
     _frame = _frameAmount;
   }

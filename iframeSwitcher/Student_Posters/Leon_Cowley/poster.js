@@ -51,7 +51,7 @@ for (let x = 0; x < buffer2.width; x++) {
       let randomIndex = floor(random(index-1));
       let tempBird = new Bird(Birds[randomIndex].startX, Birds[randomIndex].startY)
       tempBird.setEnd(endX, endY); 
-      tempBird.extra = true;
+      //tempBird.extra = true;
       Birds.push(tempBird);
      // Birds[index].extra = true;
      // Birds[index].setEnd(endX, endY); 
@@ -72,8 +72,7 @@ console.log("birds count: "+ Birds.length +"2nd inded: "+index)
 
 function draw() {
   background(0, 0, 0);
-
-  for (let i = 0; i < Birds.length; i++) {
+for (let i = 0; i < Birds.length; i++) {
     Birds[i].draw();
   }
   posterTasks(); // do not remove this last line!  

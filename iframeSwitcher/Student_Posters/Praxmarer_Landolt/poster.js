@@ -58,7 +58,7 @@ function draw() {
   newPosition = constrain(position.x, -(width/2)+(vw*10), width/2-(vw*10));
   newPosition = map(newPosition, -(width/2)+(vw*10), width/2-(vw*10), -width/2, width/2);
   fill(255,0,0)
-  circle(newPosition,position.y,10, -400);
+  //circle(newPosition,position.y,10, -400);
   Cylinder1.show();
   Cylinder2.show();
   Cylinder3.show();

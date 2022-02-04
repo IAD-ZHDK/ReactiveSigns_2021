@@ -184,7 +184,7 @@ function draw() {
   // image(brickTextTexture);
   //plane(brickTextTexture.width, brickTextTexture.height);
   //pop();
-  translate(vh,0)
+  translate(vh*2,0)
   image(brickTextTexture,0,0)
  
   //translate(-totalWidth/2, -totalHeight/2);

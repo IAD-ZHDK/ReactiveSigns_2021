@@ -30,8 +30,8 @@ function setup() {
 
 function draw() {
   push();
-  let remapedX = map(posNormal.x,0.23, 0.77, 0.0, 1.0,); // LUKE: this corects for the fact that the tracking point never gets to the very end or start of screens
-   remapedX = constrain(remapedX,0,1)
+  let remapedX = map(posNormal.x,0.15, 0.85, 0.0, 1.0,); // LUKE: this corects for the fact that the tracking point never gets to the very end or start of screens
+   remapedX = constrain(remapedX,0.0,1.0)
    // inversion is for the situation where the user arrives on the left instead of the right. 
    if (inversion) {
     remapedX = 1.0 - remapedX;
@@ -47,7 +47,7 @@ function draw() {
     }
   } else if (loopState == state) {
     loopAnimation();
-    if (tracking == true) {
+    if (tracking == true && (posNormal.x<0.20 || posNormal.x>0.80) ) {
       checkDirection(posNormal.x);
       state = trackingState;
     }
@@ -56,7 +56,6 @@ function draw() {
     if (remapedX<0.5 && tracking==false) {
       state=loopState;
     }
-
     index = startIndex + floor((endIndex - startIndex) * remapedX); // find index position of image based on normal of position x
     if (index > lastIndex) {    // avoid moving too fast through the frames 
       index = lastIndex+1;
