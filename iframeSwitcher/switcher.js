@@ -4,13 +4,11 @@ let posters = ['Janthasom_Hommel' , 'Muniz_Eggstein2D', 'Buenzli_Good','Ascic_Lo
 let testPoster = "demo_poster_simple/index.html"
 // not used: 
 let posterCount = 0
-let intervalTime = 180000; //3 minutes s
+let intervalTime = 120000; //2 minutes
 let trackingActive = false;
 let startedFlag = false;
 let streaming = false;
-let demoMode = true
-
-
+let demoMode = false
 
 function trackingCallback(tracking, OSCstreaming) {
   trackingActive = tracking
@@ -41,7 +39,8 @@ function loadTestPoster() {
 function pickPoster(number) {
   // for keyboard selection during testing
   console.log("poster no: "+number)
-  if (number-1 < posters.length-1 && number-1 >= 0) {
+  if (number-1 < posters.length && number-1 >= 0) {
+    clearInterval(myInterval);
     posterCount = number-1;
     //changePoster() 
     transition()
@@ -84,4 +83,4 @@ let myInterval = setInterval(intervalHandler, 6000);
 
 
 
-//document.addEventListener('keypress', pickPoster, true);
+document.addEventListener('keypress', pickPoster, true);

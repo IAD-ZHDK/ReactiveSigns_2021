@@ -51,12 +51,14 @@ function setupCylenders() {
   //0.833333333333334
 }
 
-
+let newPosition
 
 function draw() {
   background(0);
-
-  //circle(position.x,position.y,10);
+  newPosition = constrain(position.x, -(width/2)+(vw*10), width/2-(vw*10));
+  newPosition = map(newPosition, -(width/2)+(vw*10), width/2-(vw*10), -width/2, width/2);
+  fill(255,0,0)
+  circle(newPosition,position.y,10, -400);
   Cylinder1.show();
   Cylinder2.show();
   Cylinder3.show();
@@ -85,7 +87,7 @@ class cylinderStack {
       texture(this.T);
     noStroke();
       if (tracking) {
-        this.inputContol = position.x
+        this.inputContol = newPosition;
         let inputX = constrain(this.inputContol,this.R-(this.range/2),this.R+(this.range/2));
         inputX = map(inputX,this.R-(this.range/2),this.R+(this.range/2),0,100);
         let easedValue = easeInOutBack(inputX, this.ry, this.angle-this.ry, 100);
@@ -97,7 +99,6 @@ class cylinderStack {
         this.rotationEased[0] += this.newRotation[0];
         this.rotationEased[1] += this.newRotation[1]
         this.rotationEased[2] += this.newRotation[2]
-      
         this.trackingFlag = tracking;
       } else {
         if (this.trackingFlag != tracking) {
