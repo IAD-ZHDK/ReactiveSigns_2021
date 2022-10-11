@@ -1,4 +1,4 @@
-  // realsense 2 websocket
+// realsense 2 websocket
 // sends depth data from realsense to websockets
 // written 2021 by Florian Bruggisser
 // modified by Luke Franzke for the Reactive Signs Module, ZHdK
@@ -13,12 +13,13 @@ import gab.opencv.*;
 import java.awt.Rectangle;
 import java.io.*;
 import java.util.Calendar;
+import java.util.Collections;
 
 ControlP5 cp5;
 
 Range range;
 
-boolean demoAlowed = true;
+boolean demoAlowed = false;
 boolean editable = false;
 final int WIDTH = 640;
 final int HEIGHT = 480;
@@ -54,6 +55,7 @@ float size = 0.5f;
 
 byte[] depthBuffer = null;
 boolean cameraRunning = false;
+long lastTrackingMillis = 0;
 boolean trackingAtive = false;
 PImage defualtFrame;
 float filterRatio = .95f;
@@ -61,6 +63,7 @@ float filterRatio = .95f;
 ArrayList<Contour> contours;
 private OpenCV opencv;
 PVector singlePointAverage = new PVector(0, 0);
+ArrayList<PVector> multiPointAveraged;
 
 CSVDataStore CSVData;
 
@@ -70,7 +73,7 @@ void setup() {
   CSVData = new CSVDataStore(); // recover settings for distance camera
   setupOSC();
   setupCamera();
-  
+
   opencv = new OpenCV(this, floor((WIDTH / DECIMATION)*cropWidth), floor((HEIGHT / DECIMATION) *cropHeight));  
   println("Sending data on: ws://localhost:" + PORT + "/");
   // GUI
@@ -87,42 +90,46 @@ void setup() {
     .setBroadcast(true);
   cp5.setFont(createFont("Courier", 10));
 
-    
-    // toggle for allowing adjustments with gui
- cp5.addToggle("toggle")
-     .setPosition(20, height-90)
-     .setSize(50,20)
-     .setValue(false)
-     .setMode(ControlP5.SWITCH)
-     .setCaptionLabel("Allow Edits")
-     ;
+
+  // toggle for allowing adjustments with gui
+  cp5.addToggle("toggle")
+    .setPosition(20, height-90)
+    .setSize(50, 20)
+    .setValue(false)
+    .setMode(ControlP5.SWITCH)
+    .setCaptionLabel("Allow Edits")
+    ;
   // for demo without camera
   defualtFrame = createImage(WIDTH / DECIMATION, HEIGHT / DECIMATION, RGB);
   animationFrame(defualtFrame);
+
+  multiPointAveraged = new ArrayList<PVector>();
+  multiPointAveraged.add(new PVector(0, 0, 0));
+  println(multiPointAveraged.size());
 }
 
 void toggle(boolean theFlag) {
-   editable = theFlag;
-   setLock(cp5.getController("rangeController"),theFlag);
+  editable = theFlag;
+  setLock(cp5.getController("rangeController"), theFlag);
   println("a toggle event.");
 }
 
 void setLock(Controller theController, boolean theValue) {
 
   if (theValue) {
-      theController.setColorBackground(color(255, 40));
-      theController.setColorForeground(0xff003652);
+    theController.setColorBackground(color(255, 40));
+    theController.setColorForeground(0xff003652);
   } else {
     theController.setColorBackground(color(100, 100));
     theController.setColorForeground(color(100, 40));
   }
 
   //theController.setMouseOver(false);
-  theController.setLock(!theValue); 
+  theController.setLock(!theValue);
 }
 
 boolean setupOSC() {
-  
+
   try {
     // setup websocket
     ws = new WebsocketServer(this, PORT, "/");
@@ -178,7 +185,7 @@ boolean setupCamera() {
       return false;
     }
   }
-  
+
   return true;
 }
 
@@ -200,17 +207,18 @@ void loadRecording() {
     for (int i=0; i<recordingFrames.length; i++) {
       try {
         recordingFrames[i] = loadImage("recordings/outputImage"+i+".jpg");
-      } catch (Exception ex) {
-         totalFrames = i;
-         break;
+      } 
+      catch (Exception ex) {
+        totalFrames = i;
+        break;
       }
     }
   }
 }
 
 void draw() {
-  if (cameraRunning || demoAlowed)  {
-  drawCamara();
+  if (cameraRunning || demoAlowed) {
+    drawCamara();
   } else {
     drawError();
   }
@@ -219,26 +227,26 @@ void draw() {
 void mousePressed() {
   if (editable && keyPressed) {
     if (key == 'a' || key == 'A') {
-          cropY =  float(mouseY)/height;// percent
-          cropX =  float(mouseX)/width;// percent
+      cropY =  float(mouseY)/height;// percent
+      cropX =  float(mouseX)/width;// percent
     }
     if (key == 's' || key == 'S') {
-          cropHeight =  (float(mouseY)/height)-cropY;// percent
-          cropWidth =  (float(mouseX)/width)-cropX;// percent
+      cropHeight =  (float(mouseY)/height)-cropY;// percent
+      cropWidth =  (float(mouseX)/width)-cropX;// percent
     }
     /*
     
-    float cropY =  0.3;// percent
-float cropHeight =  0.5;// percent
-float cropX =  0.05;// percent
-float cropWidth = 0.9;// percent
-    */
+     float cropY =  0.3;// percent
+     float cropHeight =  0.5;// percent
+     float cropX =  0.05;// percent
+     float cropWidth = 0.9;// percent
+     */
   }
 }
 
 
 void drawError() {
-  background(255,0,0);
+  background(255, 0, 0);
   fill(55, 100);
   noStroke();
   rect(0, 0, width, 130);
@@ -267,11 +275,11 @@ void drawCamara() {
   PImage depthCrop = depth.get(floor(depth.width*cropX), floor(depth.height*cropY), floor(depth.width*cropWidth), floor(depth.height*cropHeight));   
   stroke(0, 255, 0);
   image(depth, 0, 0, width, height); 
-   if (editable) {
-     stroke(0xff08a2cf);
-   } else {
-     stroke(0xff003652);
-   }
+  if (editable) {
+    stroke(0xff08a2cf);
+  } else {
+    stroke(0xff003652);
+  }
   line(0, floor(height*cropY), width, floor(height*cropY));
   line(0, floor(height*cropY)+floor(height*cropHeight), width, floor(height*cropY)+floor(height*cropHeight));
   line(floor(width*cropX), 0, floor(width*cropX), height);
@@ -282,11 +290,16 @@ void drawCamara() {
   // send image over websocket
   if (cameraRunning || replaying) {
     blobTracking(depthCrop);
-    drawBlobs(depthCrop);
+    findPositions(depthCrop);
     push();
     translate(floor(width*cropX), floor(height*cropY));
     fill(0xff08a2cf);
     circle(singlePointAverage.x*depthCrop.width*DECIMATION, singlePointAverage.y*depthCrop.height*DECIMATION, singlePointAverage.z*10);
+    for (int i = 0; i<multiPointAveraged.size(); i++) {
+      PVector temp = multiPointAveraged.get(i);
+      fill(255, 100, 0);
+      circle(temp.x*depthCrop.width*DECIMATION, temp.y*depthCrop.height*DECIMATION, temp.z*10);
+    }
     pop();
   } else {
     singlePointAverage.y = .5;
@@ -310,9 +323,9 @@ void drawCamara() {
   surface.setTitle("Realsense 2 WebSocket - " + round(frameRate) + " FPS");
   if (editable) {
     fill(0xff08a2cf);
-     text("'a' + click to set top-left", 300, 30);
-     text("'s' + click to set btm-right", 300, 50);
-     text("restart required after edit", 300, 80);
+    text("'a' + click to set top-left", 300, 30);
+    text("'s' + click to set btm-right", 300, 50);
+    text("restart required after edit", 300, 80);
   }
 
   // recording
@@ -338,14 +351,17 @@ PImage getDepthImage() {
   }
 }
 
-void drawBlobs(PImage depthImage) {
+void findPositions(PImage depthImage) {
   PVector point = new PVector(0.5, 0.5, 0.01);//  set the point to middle of tracking area
+
   if (contours.size() > 0) {
     trackingAtive = true; 
     float xAverage = 0;
     float yAverage = 0;
     float zAverage = 0;
     int count = 0;
+    ArrayList<PVector> multiPointTemp = new ArrayList<PVector>();
+
     for (int i = 0; i<contours.size(); i++) {
       Contour biggestContour = contours.get(i);
       Rectangle r = biggestContour.getBoundingBox();
@@ -364,14 +380,14 @@ void drawBlobs(PImage depthImage) {
         strokeWeight(4);
         stroke(255, 0, 0);
         rect(rx, ry, rw, rh);
+        text("ID: "+i, rx+10, ry+10);
         //fill(30, 100, 100);
         //blob center
         // single point
         float x = rx + rw/2;
         float y = ry + rh/2;
         float z = (rw / r.width); // somewhat arbitrary division
-        stroke(255, 0, 0);
-        circle(x, y, z);
+        // circle(x, y, z);
         pop();
         // normalize all values
         x = x / depthImage.width;
@@ -379,29 +395,90 @@ void drawBlobs(PImage depthImage) {
         xAverage += x / DECIMATION;
         yAverage += y / DECIMATION;
         zAverage += z / DECIMATION;
+        multiPointTemp.add(new PVector(x / DECIMATION, y / DECIMATION, z / DECIMATION));
         count++;
       }
     }  
     if (count>0) {
+      lastTrackingMillis = millis();
       // there is more than one person! 
       xAverage = xAverage/count;
       yAverage = yAverage/count;
       zAverage = zAverage/count;
       point.set(xAverage, yAverage, zAverage);
-      //  stroke(255, 255, 0);
-      // circle(point.x*depthImage.width, point.y*depthImage.height, point.z);
       filterRatio = 0.95;
+
+
+      // find closest match from new blobs to average 
+      int[] indexOrder = new int[multiPointTemp.size()];
+       for (int i = 0; i<multiPointTemp.size(); i++) {
+        int closestIndex = 0;
+        float shortestDist = width+height;
+        for (int j = 0; j < multiPointAveraged.size(); j++) {
+         float distance =  multiPointTemp.get(i).dist(multiPointAveraged.get(j));
+         if (distance<shortestDist) {
+           shortestDist = distance;
+           closestIndex = j;
+         }
+        }
+         indexOrder[i] = closestIndex;
+       }
+ 
+      // TODO: THREE IS A PROBLEM REMOVING POINTS TO THE RIGHT INDEX.
+      
+      if (multiPointAveraged.size() > multiPointTemp.size()) {
+        int lengthDifference = multiPointAveraged.size()-multiPointTemp.size();
+        for (int i = 0; i < lengthDifference; i++) {
+          multiPointAveraged.remove(i);
+        }
+      }
+
+      // sort contours by x pos to maintain location of IDs
+      Collections.sort(multiPointAveraged, new XComparator());
+      Collections.sort(multiPointTemp, new XComparator());
+      //
+      //
+      // average single points 
+      // TODO: THREE IS A PROBLEM ADDING  POINTS TO THE RIGHT INDEX. 
+      int existingPoints = multiPointAveraged.size();
+      for (int i = 0; i<multiPointTemp.size(); i++) {
+        PVector temp2 = multiPointTemp.get(i);   
+        if (i<existingPoints) {
+          // point is already tracked 
+          PVector temp1 = multiPointAveraged.get(i);
+          temp1.mult(0.9);
+          temp2.mult(0.1);
+          temp1.add(temp2);
+        } else {
+          multiPointAveraged.add(temp2.copy());
+          // sort again
+        }
+      }
     } else {
       // no blobs found
-      trackingAtive = false; 
+
+      if (millis() > lastTrackingMillis+400) {
+        // delay before setting active to false 
+        trackingAtive = false;
+      }
       filterRatio = 0.98;
     }
-  } 
+  } else {
+    // remove all points
+    if (multiPointAveraged.size() > 1) {
+      for (int i = multiPointAveraged.size() - 1; i > 0; i--) {
+        multiPointAveraged.remove(i);
+      }
+    }
+  }
 
   /* calculate moveing weighted average of blobs */
   singlePointAverage.mult(filterRatio);
   singlePointAverage.add(point.mult(1-filterRatio));
 }
+
+
+
 void blobTracking(PImage depthImage) {
   try {
     PImage trackImage = depthImage;

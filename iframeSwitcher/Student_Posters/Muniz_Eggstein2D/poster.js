@@ -228,20 +228,20 @@ function getDepth(x, y) {
        let depthX = floor((x/width) * depthW)
        let depthY = floor((y/height) * depthH)
        let index = (depthY*depthW)+depthX;
-          if (dataFiltered[index] > 0.0) {
-              depth = map(dataFiltered[index],0,20, 0, vh*6, true);           
+          if (data[index] > 0.0) {
+              depth = (vh*3)+(50*(1.0-(y/height)));           
           }
     } catch (e) {
     }
   } else {
-    */
+  */
      // let distance = dist(position.x,position.y,x,y)
      var a = (position.x - x)*2;
       var b = (position.y - y);
 
     let distance = Math.sqrt( a*a + b*b );
       depth = map(distance,0,vh*60,vh*8,0, true); 
-    //}
+ // }
   return depth;
 }
 
